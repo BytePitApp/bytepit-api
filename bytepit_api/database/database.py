@@ -25,7 +25,7 @@ class Database:
     def execute_one(self, query_tuple: tuple):
         try:
             assert isinstance(query_tuple[0], str), "Query must be a string"
-            assert isinstance(query_tuple[1], tuple), "Query parameters must be a tuple"
+            assert query_tuple[1] is None or isinstance(query_tuple[1], tuple), "Query parameters must be a tuple or None"
             
             (query, param_tuple) = query_tuple
 
@@ -48,7 +48,7 @@ class Database:
             with self.connection.transaction():
                 for query, param_tuple in query_tuple_list:
                     assert isinstance(query, str), "Query must be a string"
-                    assert isinstance(param_tuple, tuple), "Query parameters must be a tuple"
+                    assert param_tuple is None or isinstance(param_tuple, tuple), "Query parameters must be a tuple or None"
                     
                     cursor.execute(query, param_tuple)
                     total_affected_rows += cursor.rowcount
