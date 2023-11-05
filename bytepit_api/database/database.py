@@ -23,22 +23,36 @@ class Database:
         sys.exit(1)
 
     def execute_one(self, query_tuple: tuple):
-        (query, param_dict) = query_tuple
+        try:
+            assert isinstance(query_tuple[0], str), "Query must be a string"
+            assert isinstance(query_tuple[1], tuple), "Query parameters must be a tuple"
+            
+            (query, param_tuple) = query_tuple
 
-        cursor = self.connection.cursor()
-        cursor.execute(query, param_dict)
+            cursor = self.connection.cursor()
+            cursor.execute(query, param_tuple)
 
-        if cursor.description is not None:
-            result = cursor.fetchall()
-            return {"result": result, "affected_rows": cursor.rowcount}
-        else:
-            return {"affected_rows": cursor.rowcount}
+            if cursor.description is not None:
+                result = cursor.fetchall()
+                return {"result": result, "affected_rows": cursor.rowcount}
+            else:
+                return {"affected_rows": cursor.rowcount}
+        except psycopg.Error as e:
+            print(e)
+            return {"affected_rows": 0}
 
     def execute_many(self, query_tuple_list: List[tuple]):
-        total_affected_rows = 0
-        cursor = self.connection.cursor()
-        with self.connection.transaction():
-            for query, param_dict in query_tuple_list:
-                cursor.execute(query, param_dict)
-                total_affected_rows += cursor.rowcount
-            return {"affected_rows": total_affected_rows}
+        try:
+            total_affected_rows = 0
+            cursor = self.connection.cursor()
+            with self.connection.transaction():
+                for query, param_tuple in query_tuple_list:
+                    assert isinstance(query, str), "Query must be a string"
+                    assert isinstance(param_tuple, tuple), "Query parameters must be a tuple"
+                    
+                    cursor.execute(query, param_tuple)
+                    total_affected_rows += cursor.rowcount
+                return {"affected_rows": total_affected_rows}
+        except psycopg.Error as e:
+            print(e)
+            return {"affected_rows": 0}
