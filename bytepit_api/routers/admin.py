@@ -9,8 +9,8 @@ def list_users():
     return
 
 
-@router.post("/confirm-organizer/{user_id}")
-def confirm_organizer(user_id: int):
+@router.post("/confirm-organiser/{user_id}")
+def confirm_organiser(user_id: int):
     return
 
 
