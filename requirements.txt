@@ -1,5 +1,6 @@
 fastapi
-pydantic
+pydantic[email]
 uvicorn
 requests
+python-multipart
 psycopg
