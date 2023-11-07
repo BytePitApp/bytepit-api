@@ -1,7 +1,7 @@
 import inspect
 
 from enum import Enum
-from typing import Annotated
+from typing import Annotated, Union
 
 from fastapi import Form
 from pydantic import BaseModel, EmailStr
@@ -40,5 +40,15 @@ class RegistrationForm(BaseModel):
     name: Annotated[str, Form()]
     surname: Annotated[str, Form()]
     email: Annotated[EmailStr, Form()]
-    role: Annotated[Role, Form()] = Role.contenstant
+    role: Annotated[Role, Form()]
     # image: Annotated[str, Form()] = None
+
+
+@as_form
+class LoginForm(BaseModel):
+    username: Annotated[str, Form()]
+    password: Annotated[str, Form()]
+    scope: Annotated[str, Form()] = ""
+    client_id: Annotated[Union[str, None], Form()] = None
+    client_secret: Annotated[Union[str, None], Form()] = None
+    grant_type: Annotated[Union[str, None], Form(pattern="password")] = None
