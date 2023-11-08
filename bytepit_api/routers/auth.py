@@ -1,11 +1,15 @@
+from datetime import timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
-from bytepit_api.models.auth_schemes import RegistrationForm, LoginForm
-from bytepit_api.models.auth_schemes import Token
+from fastapi import APIRouter, Depends, HTTPException, status
+from bytepit_api.models.auth_schemes import LoginForm, RegistrationForm, Token
+
+from bytepit_api.helpers.login_helpers import authenticate_user, create_access_token
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
 @router.post("/register")
@@ -20,4 +24,21 @@ def confirm_email(verification_token: str):
 
 @router.post("/login", response_model=Token)
 def login_for_access_token(form_data: Annotated[LoginForm, Depends()]):
-    return
+    user = authenticate_user(form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password. If you have not verified your account, please do so before logging in.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if not user.is_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account inactive. Please verify your email before logging in.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}

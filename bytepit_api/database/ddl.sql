@@ -7,11 +7,12 @@ CREATE TABLE users (
     role            user_role       NOT NULL,
     username        VARCHAR(32)     NOT NULL CHECK (LENGTH(username) > 3) UNIQUE,
     image           BYTEA,
-    password        TEXT            NOT NULL,
+    password_hash   VARCHAR(255)    NOT NULL,
     email           VARCHAR(128)    NOT NULL CHECK (LENGTH(email) > 4) UNIQUE,
     name            VARCHAR(64)     NOT NULL,
     surname         VARCHAR(64)     NOT NULL,
-    is_verified     BOOLEAN         NOT NULL
+    is_verified     BOOLEAN         NOT NULL,
+    created_on      TIMESTAMP       NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX index_users_email ON users (email);
@@ -26,7 +27,8 @@ CREATE TABLE problems (
     runtime_limit   TIME            NOT NULL,
     description     TEXT            NOT NULL,
     tests_dir       TEXT            NOT NULL,
-    is_private      BOOLEAN         NOT NULL
+    is_private      BOOLEAN         NOT NULL,
+    created_on      TIMESTAMP       NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE competition (
