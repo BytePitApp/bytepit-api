@@ -34,6 +34,10 @@ class Token(BaseModel):
     token_type: str
 
 
+class TokenData(BaseModel):
+    email: Union[str, None] = None
+
+
 @as_form
 class RegistrationForm(BaseModel):
     username: Annotated[str, Form()]
