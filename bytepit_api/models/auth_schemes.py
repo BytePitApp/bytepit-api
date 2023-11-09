@@ -1,4 +1,5 @@
 import inspect
+import uuid
 
 from enum import Enum
 from typing import Annotated, Union
@@ -33,6 +34,10 @@ class Token(BaseModel):
     token_type: str
 
 
+class TokenData(BaseModel):
+    email: Union[str, None] = None
+
+
 @as_form
 class RegistrationForm(BaseModel):
     username: Annotated[str, Form()]
@@ -52,3 +57,17 @@ class LoginForm(BaseModel):
     client_id: Annotated[Union[str, None], Form()] = None
     client_secret: Annotated[Union[str, None], Form()] = None
     grant_type: Annotated[Union[str, None], Form(pattern="password")] = None
+
+
+class User(BaseModel):
+    username: str
+    email: str
+    role: str
+    name: str
+    surname: str
+    is_verified: bool
+
+
+class UserInDB(User):
+    id: uuid.UUID
+    password_hash: str
