@@ -10,7 +10,7 @@ from fastapi.security.utils import get_authorization_scheme_param
 from jose import JWTError, jwt
 
 from bytepit_api.helpers.login_helpers import get_user_by_email_or_username
-from bytepit_api.models.auth_schemes import TokenData, User 
+from bytepit_api.models.auth_schemes import TokenData, User
 
 
 class OAuth2PasswordBearerWithCookie(OAuth2):
