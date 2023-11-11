@@ -73,3 +73,34 @@ CREATE TABLE trophies (
     position        SMALLINT        NOT NULL CHECK (position > 0),
     icon            BYTEA           NOT NULL
 );
+
+CREATE TABLE verification_tokens (
+    token          VARCHAR(255)    NOT NULL PRIMARY KEY UNIQUE,
+    user_id        UUID            NOT NULL REFERENCES users(id) ON DELETE CASCADE
+    expiry_date    TIMESTAMP       NOT NULL
+);
+
+
+CREATE OR REPLACE FUNCTION delete_confirmed_token() RETURNS TRIGGER AS $$
+BEGIN
+    DELETE FROM verification_tokens WHERE user_id = OLD.id;
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER delete_confirmed_token
+AFTER UPDATE ON users 
+FOR EACH ROW WHEN (OLD.is_verified = FALSE AND NEW.is_verified = TRUE)
+EXECUTE FUNCTION delete_confirmed_token();
+
+CREATE OR REPLACE FUNCTION delete_expired_tokens() RETURNS TRIGGER AS $$
+BEGIN
+    DELETE FROM verification_tokens WHERE expiry_date < NOW();
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER delete_expired_tokens
+AFTER INSERT ON verification_tokens
+FOR EACH ROW
+EXECUTE FUNCTION delete_expired_tokens();

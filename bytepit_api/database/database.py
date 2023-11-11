@@ -14,7 +14,9 @@ class Database:
     def connect(self, connection_string, max_retries=3):
         for _ in range(0, max_retries):
             try:
-                connection = psycopg.connect(connection_string, row_factory=dict_row, autocommit=True)
+                connection = psycopg.connect(
+                    connection_string, row_factory=dict_row, autocommit=True
+                )
                 return connection
             except psycopg.OperationalError as e:
                 print("Unable to connect to database. Retrying...")
