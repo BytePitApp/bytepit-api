@@ -18,3 +18,20 @@ def get_user_by_email(email: str):
         return UserInDB(**result["result"][0])
     else:
         return None
+
+
+def create_user(
+    username, password_hash, name, surname, email, role, image, confirmation_token
+):
+    user_insert_query = (
+        "INSERT INTO users (username, password_hash, name, surname, email, role, image, is_verified) "
+        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+        (username, password_hash, name, surname, email, role, image, False),
+    )
+
+    token_insert_query = (
+        "INSERT INTO verification_tokens (token, user_id) "
+        "VALUES (%s, (SELECT id FROM users WHERE email = %s))",
+        (confirmation_token, email),
+    )
+    db.execute_many(user_insert_query, token_insert_query)

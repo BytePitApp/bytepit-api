@@ -45,5 +45,7 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
 
 def get_user_by_email_or_username(identifier: str):
     is_email = check_if_email(identifier)
-    user = get_user_by_email(identifier) if is_email else get_user_by_username(identifier)
+    user = (
+        get_user_by_email(identifier) if is_email else get_user_by_username(identifier)
+    )
     return user
