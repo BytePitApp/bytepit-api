@@ -28,7 +28,6 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
 
     async def __call__(self, request: Request) -> Optional[str]:
         authorization: str = request.cookies.get("access_token")
-        print("access_token is", authorization)
 
         scheme, param = get_authorization_scheme_param(authorization)
         if not authorization or scheme.lower() != "bearer":
@@ -72,4 +71,10 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 def get_current_verified_user(current_user: Annotated[User, Depends(get_current_user)]):
     if not current_user.is_verified:
         raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
+
+
+def get_current_admin_user(current_user: Annotated[User, Depends(get_current_verified_user)]):
+    if not current_user.role == "admin":
+        raise HTTPException(status_code=400, detail="User is not admin")
     return current_user
