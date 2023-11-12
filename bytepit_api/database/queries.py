@@ -53,4 +53,3 @@ def get_unverified_organisers():
         return UsersInDB(users=[])
     else:
         return None
-    
