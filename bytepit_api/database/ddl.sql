@@ -3,17 +3,17 @@ CREATE EXTENSION "uuid-ossp";
 CREATE TYPE user_role AS ENUM ('admin', 'contestant', 'organiser');
 
 CREATE TABLE users (
-    id              uuid            DEFAULT uuid_generate_v4() PRIMARY KEY,
-    role            user_role       NOT NULL,
-    username        VARCHAR(32)     NOT NULL CHECK (LENGTH(username) > 3) UNIQUE,
-    image           BYTEA,
-    password_hash   VARCHAR(255)    NOT NULL,
-    email           VARCHAR(128)    NOT NULL CHECK (LENGTH(email) > 4) UNIQUE,
-    name            VARCHAR(64)     NOT NULL,
-    surname         VARCHAR(64)     NOT NULL,
-    is_verified     BOOLEAN         NOT NULL,
-    organiser_approved BOOLEAN      DEFAULT NULL,
-    created_on      TIMESTAMP       NOT NULL DEFAULT NOW()
+    id                  uuid            DEFAULT uuid_generate_v4() PRIMARY KEY,
+    role                user_role       NOT NULL,
+    username            VARCHAR(32)     NOT NULL CHECK (LENGTH(username) > 3) UNIQUE,
+    image               BYTEA,
+    password_hash       VARCHAR(255)    NOT NULL,
+    email               VARCHAR(128)    NOT NULL CHECK (LENGTH(email) > 4) UNIQUE,
+    name                VARCHAR(64)     NOT NULL,
+    surname             VARCHAR(64)     NOT NULL,
+    is_verified         BOOLEAN         NOT NULL,
+    approved_by_admin   BOOLEAN         NOT NULL DEFAULT TRUE,
+    created_on          TIMESTAMP       NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX index_users_email ON users (email);
