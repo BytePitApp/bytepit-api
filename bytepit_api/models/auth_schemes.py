@@ -62,7 +62,7 @@ class LoginForm(BaseModel):
 class User(BaseModel):
     username: str
     email: str
-    role: str
+    role: Role
     name: str
     surname: str
     is_verified: bool
@@ -71,3 +71,4 @@ class User(BaseModel):
 class UserInDB(User):
     id: uuid.UUID
     password_hash: str
+    role: Union[Role, str]
