@@ -25,8 +25,15 @@ def list_unverified_organisers():
 
 
 @router.post("/confirm-organiser/{user_id}")
-def confirm_organiser(user_id: uuid.UUID):
-    return
+def confirm_organiser(user_id: uuid.UUID, current_admin_user: User = Depends(get_current_admin_user)):
+    role = Role.organiser.name
+
+    if save_role_to_db(user_id, role):
+        message = f"Role successfully changed to {role}"
+        return Response(status_code=status.HTTP_200_OK, content=message)
+
+    message = "User with given id doesn't exist."
+    return Response(status_code=status.HTTP_200_OK, content=message)
 
 
 @router.post("/change-role/{user_id}/{new_role}")
