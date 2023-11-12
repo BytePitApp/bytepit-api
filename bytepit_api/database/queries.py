@@ -1,5 +1,5 @@
 from bytepit_api.database import db
-from bytepit_api.models.auth_schemes import UserInDB, UsersInDB
+from bytepit_api.models.auth_schemes import UserInDB
 
 
 def get_user_by_username(username: str):
@@ -38,18 +38,18 @@ def get_users():
     query_tuple = ("SELECT * FROM users", ())
     result = db.execute_one(query_tuple)
     if result["result"]:
-        return UsersInDB(users=[UserInDB(**user_data) for user_data in result["result"]])
+        return [UserInDB(**user) for user in result["result"]]
     elif result["result"] == []:
-        return UsersInDB(users=[])
+        return []
     else:
         return None
     
 def get_unverified_organisers():
-    query_tuple = ("SELECT * FROM users WHERE role = 'organiser' AND is_verified = False", ())
+    query_tuple = ("SELECT * FROM users WHERE role = 'organiser' AND is_verified = false", ())
     result = db.execute_one(query_tuple)
     if result["result"]:
-        return UsersInDB(users=[UserInDB(**user_data) for user_data in result["result"]])
+        return [UserInDB(**user) for user in result["result"]]
     elif result["result"] == []:
-        return UsersInDB(users=[])
+        return []
     else:
         return None
