@@ -1,3 +1,5 @@
+import uuid
+
 from bytepit_api.database import db
 from bytepit_api.models.auth_schemes import UserInDB
 
@@ -20,6 +22,16 @@ def get_user_by_email(email: str):
         return None
 
 
+def get_user_by_id(user_id: uuid.UUID):
+    query_tuple = ("SELECT * FROM users WHERE id = %s", (user_id,))
+    result = db.execute_one(query_tuple)
+
+    if result["result"]:
+        return UserInDB(**result["result"][0])
+    else:
+        return None
+
+
 def create_user(username, password_hash, name, surname, email, role, confirmation_token):
     user_insert_query = (
         "INSERT INTO users (username, password_hash, name, surname, email, role, is_verified) "
@@ -33,3 +45,15 @@ def create_user(username, password_hash, name, surname, email, role, confirmatio
     )
     result = db.execute_many([user_insert_query, token_insert_query])
     return result["affected_rows"] == 2
+
+
+def update_user_role(user_id: uuid.UUID, role: str):
+    user = get_user_by_id(user_id)
+
+    if user:
+        user_update_query = ("UPDATE users SET role = %s WHERE id = %s", (role, user_id))
+        result = db.execute_one(user_update_query)
+
+        return result["affected_rows"] == 1
+
+    return False
