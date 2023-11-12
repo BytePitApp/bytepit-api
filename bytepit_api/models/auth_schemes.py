@@ -72,3 +72,11 @@ class UserInDB(User):
     id: uuid.UUID
     password_hash: str
     role: Union[Role, str]
+
+
+class Users(User):
+    users: list[User]
+
+
+class UsersInDB(BaseModel):
+    users: list[UserInDB]
