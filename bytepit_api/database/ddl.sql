@@ -1,6 +1,6 @@
 CREATE EXTENSION "uuid-ossp";
 
-CREATE TYPE user_role AS ENUM ('Admin', 'Contestant', 'Organiser');
+CREATE TYPE user_role AS ENUM ('admin', 'contestant', 'organiser');
 
 CREATE TABLE users (
     id              uuid            DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -73,3 +73,34 @@ CREATE TABLE trophies (
     position        SMALLINT        NOT NULL CHECK (position > 0),
     icon            BYTEA           NOT NULL
 );
+
+CREATE TABLE verification_tokens (
+    token          VARCHAR(255)    NOT NULL PRIMARY KEY UNIQUE,
+    email          VARCHAR(128)    NOT NULL REFERENCES users(email) ON DELETE CASCADE,
+    expiry_date    TIMESTAMP       NOT NULL DEFAULT NOW() + '2 day'::INTERVAL
+);
+
+
+CREATE OR REPLACE FUNCTION delete_confirmed_token() RETURNS TRIGGER AS $$
+BEGIN
+    DELETE FROM verification_tokens WHERE email = OLD.email;
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER delete_confirmed_token
+AFTER UPDATE ON users 
+FOR EACH ROW WHEN (OLD.is_verified = FALSE AND NEW.is_verified = TRUE)
+EXECUTE FUNCTION delete_confirmed_token();
+
+CREATE OR REPLACE FUNCTION delete_expired_tokens() RETURNS TRIGGER AS $$
+BEGIN
+    DELETE FROM verification_tokens WHERE expiry_date < NOW();
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER delete_expired_tokens
+AFTER INSERT ON verification_tokens
+FOR EACH ROW
+EXECUTE FUNCTION delete_expired_tokens();
