@@ -83,7 +83,7 @@ CREATE TABLE verification_tokens (
 
 CREATE OR REPLACE FUNCTION delete_confirmed_token() RETURNS TRIGGER AS $$
 BEGIN
-    DELETE FROM verification_tokens WHERE user_id = OLD.id;
+    DELETE FROM verification_tokens WHERE email = OLD.email;
     RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
