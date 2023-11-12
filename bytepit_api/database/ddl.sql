@@ -12,6 +12,7 @@ CREATE TABLE users (
     name            VARCHAR(64)     NOT NULL,
     surname         VARCHAR(64)     NOT NULL,
     is_verified     BOOLEAN         NOT NULL,
+    organiser_approved BOOLEAN      DEFAULT NULL,
     created_on      TIMESTAMP       NOT NULL DEFAULT NOW()
 );
 
