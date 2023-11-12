@@ -3,6 +3,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 
+from bytepit_api.helpers.confirmation_helpers import activate_user
+from bytepit_api.helpers.email_helpers import send_verification_email
 from bytepit_api.helpers.login_helpers import authenticate_user, create_access_token
 from bytepit_api.helpers.register_helpers import register_user
 from bytepit_api.models.auth_schemes import LoginForm, RegistrationForm, Token
@@ -30,14 +32,20 @@ async def register(form_data: Annotated[RegistrationForm, Depends()]):
         form_data.role,
         # form_data.image,
     )
-    # await send_verification_email(form_data.email, confirmation_token)
+    await send_verification_email(form_data.email, confirmation_token)
 
     return Response(status_code=status.HTTP_201_CREATED)
 
 
 @router.post("/confirm-registration/{verification_token}")
 def confirm_email(verification_token: str):
-    return
+    activation_result = activate_user(verification_token)
+    if activation_result:
+        return {"message": "User activated"}
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Wrong verification token or user already activated"
+        )
 
 
 @router.post("/login", response_model=Token)
@@ -52,7 +60,7 @@ def login_for_access_token(response: Response, form_data: Annotated[LoginForm, D
     if not user.is_verified:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Account inactive. Please verify your email before logging in.",
+            detail="Users account inactive. Please verify your email before logging in.",
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
