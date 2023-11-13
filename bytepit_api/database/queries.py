@@ -26,8 +26,10 @@ def create_user(username, password_hash, name, surname, email, role, confirmatio
     approved_by_admin = False if role == "organiser" else True
     
     user_insert_query = (
-        "INSERT INTO users (username, password_hash, name, surname, email, role, is_verified, approved_by_admin) "
-        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+        """
+        INSERT INTO users (username, password_hash, name, surname, email, role, is_verified, approved_by_admin)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """,
         (username, password_hash, name, surname, email, role, False, approved_by_admin),
     )
 
