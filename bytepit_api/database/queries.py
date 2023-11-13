@@ -40,23 +40,13 @@ def create_user(username, password_hash, name, surname, email, role, confirmatio
 def get_users():
     query_tuple = ("SELECT * FROM users", ())
     result = db.execute_one(query_tuple)
-    if result["result"]:
-        return [User(**user) for user in result["result"]]
-    elif result["result"] == []:
-        return []
-    else:
-        return None
+    return [User(**user) for user in result["result"]]
 
 
 def get_unverified_organisers():
-    query_tuple = ("SELECT * FROM users WHERE role = 'organiser' AND is_verified = false", ())
+    query_tuple = ("SELECT * FROM users WHERE role = 'organiser' AND approved_by_admin = false", ())
     result = db.execute_one(query_tuple)
-    if result["result"]:
-        return [User(**user) for user in result["result"]]
-    elif result["result"] == []:
-        return []
-    else:
-        return None
+    return [User(**user) for user in result["result"]]
 
 
 def set_verified_user(user_id: uuid.UUID):

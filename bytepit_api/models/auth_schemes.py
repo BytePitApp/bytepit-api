@@ -30,6 +30,10 @@ class Role(str, Enum):
     admin = "admin"
 
 
+class RegisterRole(str, Enum):
+    organiser = "organiser"
+    contestant = "contestant"
+
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -46,7 +50,7 @@ class RegistrationForm(BaseModel):
     name: Annotated[str, Form()]
     surname: Annotated[str, Form()]
     email: Annotated[EmailStr, Form()]
-    role: Annotated[Role, Form()]
+    role: Annotated[RegisterRole, Form()]
     # image: Annotated[str, Form()] = None
 
 
@@ -67,9 +71,9 @@ class User(BaseModel):
     name: str
     surname: str
     is_verified: bool
+    approved_by_admin: bool
 
 
 class UserInDB(User):
     id: uuid.UUID
     password_hash: str
-    role: Union[Role, str]
