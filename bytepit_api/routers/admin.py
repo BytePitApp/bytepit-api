@@ -1,27 +1,32 @@
 import uuid
 
-from typing import Annotated
+from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, Response, status
 
 from bytepit_api.dependencies.auth_dependencies import get_current_admin_user
 from bytepit_api.helpers.admin_helpers import save_role_to_db, verify_role
 from bytepit_api.models.auth_schemes import Role, User
+from bytepit_api.database.queries import get_users, get_unverified_organisers
 
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
-@router.get("/users")
+@router.get(
+    "/list-users",
+    response_model=List[User],
+)
 def list_users():
-    return
+    return get_users()
 
 
 @router.get(
     "/unverified-organisers",
+    response_model=List[User],
 )
 def list_unverified_organisers():
-    return
+    return get_unverified_organisers()
 
 
 @router.post("/confirm-organiser/{user_id}")
