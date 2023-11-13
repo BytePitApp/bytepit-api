@@ -27,6 +27,7 @@ def as_form(cls):
 class Role(str, Enum):
     organiser = "organiser"
     contestant = "contestant"
+    admin = "admin"
 
 
 class Token(BaseModel):
