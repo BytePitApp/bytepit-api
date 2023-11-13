@@ -34,6 +34,7 @@ class RegisterRole(str, Enum):
     organiser = "organiser"
     contestant = "contestant"
 
+
 class Token(BaseModel):
     access_token: str
     token_type: str
