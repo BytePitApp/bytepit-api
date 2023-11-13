@@ -1,7 +1,7 @@
 import uuid
 
 from bytepit_api.database import db
-from bytepit_api.models.auth_schemes import User, UserInDB
+from bytepit_api.models.auth_schemes import RegisterRole, User, UserInDB
 
 
 def get_user_by_username(username: str):
@@ -93,13 +93,14 @@ def get_user_by_verification_token(verification_token: str):
         return None
 
 
-def update_user_role(user_id: uuid.UUID, role: str):
-    user = get_user_by_id(user_id)
+def set_user_role(username: str, new_role: RegisterRole):
+    approved_by_admin = False if new_role == RegisterRole.organiser else True
+    query_tuple = ("UPDATE users SET role = %s, approved_by_admin = %s WHERE username = %s", (new_role, approved_by_admin, username))
+    result = db.execute_one(query_tuple)
+    return result["affected_rows"] == 1
 
-    if user:
-        user_update_query = ("UPDATE users SET role = %s WHERE id = %s", (role, user_id))
-        result = db.execute_one(user_update_query)
 
-        return result["affected_rows"] == 1
-
-    return False
+def set_approved_organiser(username: str):
+    query_tuple = ("UPDATE users SET approved_by_admin = true WHERE username = %s", (username,))
+    result = db.execute_one(query_tuple)
+    return result["affected_rows"] == 1
