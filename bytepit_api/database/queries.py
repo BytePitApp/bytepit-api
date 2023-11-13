@@ -1,7 +1,7 @@
 import uuid
 
 from bytepit_api.database import db
-from bytepit_api.models.auth_schemes import UserInDB
+from bytepit_api.models.auth_schemes import User, UserInDB
 
 
 def get_user_by_username(username: str):
@@ -35,6 +35,18 @@ def create_user(username, password_hash, name, surname, email, role, confirmatio
     )
     result = db.execute_many([user_insert_query, token_insert_query])
     return result["affected_rows"] == 2
+
+
+def get_users():
+    query_tuple = ("SELECT * FROM users", ())
+    result = db.execute_one(query_tuple)
+    return [User(**user) for user in result["result"]]
+
+
+def get_unverified_organisers():
+    query_tuple = ("SELECT * FROM users WHERE role = 'organiser' AND approved_by_admin = false", ())
+    result = db.execute_one(query_tuple)
+    return [User(**user) for user in result["result"]]
 
 
 def set_verified_user(user_id: uuid.UUID):
