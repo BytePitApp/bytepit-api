@@ -5,7 +5,7 @@ from typing import Annotated, List
 from fastapi import APIRouter
 
 from bytepit_api.dependencies.auth_dependencies import get_current_admin_user
-from bytepit_api.models.auth_schemes import Role, UserInDB
+from bytepit_api.models.auth_schemes import Role, User
 from bytepit_api.database.queries import get_users, get_unverified_organisers
 
 
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 @router.get(
     "/list-users",
-    response_model=List[UserInDB],
+    response_model=List[User],
 )
 def list_users():
     return get_users()
@@ -22,7 +22,7 @@ def list_users():
 
 @router.get(
     "/unverified-organisers",
-    response_model=List[UserInDB],
+    response_model=List[User],
 )
 def list_unverified_organisers():
     return get_unverified_organisers()
