@@ -7,7 +7,7 @@ from bytepit_api.routers.user import router as user_router
 
 
 router = APIRouter()
-router.include_router(admin_router, dependencies=[Depends(get_current_admin_user)])
+router.include_router(admin_router)
 router.include_router(auth_router)
 router.include_router(user_router)
 

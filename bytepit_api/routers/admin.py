@@ -2,37 +2,41 @@ import uuid
 
 from typing import Annotated, List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, Response, status
 
 from bytepit_api.dependencies.auth_dependencies import get_current_admin_user
 from bytepit_api.models.auth_schemes import Role, User
-from bytepit_api.database.queries import get_users, get_unverified_organisers
+from bytepit_api.database.queries import get_unverified_organisers, get_users, set_approved_organiser, set_user_role
 
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
-@router.get(
-    "/list-users",
-    response_model=List[User],
-)
+@router.get("/list-users", response_model=List[User])
 def list_users():
     return get_users()
 
 
-@router.get(
-    "/unverified-organisers",
-    response_model=List[User],
-)
+@router.get("/unverified-organisers", response_model=List[User])
 def list_unverified_organisers():
     return get_unverified_organisers()
 
 
-@router.post("/confirm-organiser/{user_id}")
-def confirm_organiser(user_id: uuid.UUID):
-    return
+@router.post("/confirm-organiser/{username}")
+def confirm_organiser(username: str, current_admin_user: Annotated[User, Depends(get_current_admin_user)]):
+    result = set_approved_organiser(username)
+    if result:
+        return {"detail": f"Organiser {username} is now approved"}
+    return Response(status_code=status.HTTP_404_NOT_FOUND)
 
 
-@router.post("/change-role/{user_id}/{new_role}")
-def change_role(user_id: uuid.UUID, new_role: Annotated[Role, "new_role"]):
-    return
+@router.post("/change-role/{username}/{new_role}")
+def change_role(
+    username: str,
+    new_role: Annotated[Role, "new_role"],
+    current_admin_user: Annotated[User, Depends(get_current_admin_user)],
+):
+    result = set_user_role(username, new_role)
+    if result:
+        return {"detail": f"Role successfully changed to {new_role}"}
+    return Response(status_code=status.HTTP_404_NOT_FOUND)
