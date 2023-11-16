@@ -24,9 +24,10 @@ app.add_middleware(
 
 app.include_router(router)
 
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
-    formatted_errors = [] 
+    formatted_errors = []
     error_details = exc.errors()
     for error in error_details:
         print(error)
