@@ -30,7 +30,6 @@ async def validation_exception_handler(request, exc):
     formatted_errors = []
     error_details = exc.errors()
     for error in error_details:
-        print(error)
         error_message = error["msg"]
         if "value is not a valid email address: " in error_message:
             error_message = error_message.replace("value is not a valid email address: ", "")
