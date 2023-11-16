@@ -34,7 +34,7 @@ def get_user_by_id(user_id: uuid.UUID):
 
 def create_user(username, password_hash, name, surname, email, role, confirmation_token):
     approved_by_admin = False if role == "organiser" else True
-    
+
     user_insert_query = (
         """
         INSERT INTO users (username, password_hash, name, surname, email, role, is_verified, approved_by_admin)
@@ -95,7 +95,10 @@ def get_user_by_verification_token(verification_token: str):
 
 def set_user_role(username: str, new_role: RegisterRole):
     approved_by_admin = False if new_role == RegisterRole.organiser else True
-    query_tuple = ("UPDATE users SET role = %s, approved_by_admin = %s WHERE username = %s", (new_role, approved_by_admin, username))
+    query_tuple = (
+        "UPDATE users SET role = %s, approved_by_admin = %s WHERE username = %s",
+        (new_role, approved_by_admin, username),
+    )
     result = db.execute_one(query_tuple)
     return result["affected_rows"] == 1
 
