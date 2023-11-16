@@ -19,15 +19,50 @@ connection_config = ConnectionConfig(
 async def send_verification_email(email, token):
     message_html = f"""
     <html>
+        <head>
+            <style>
+                body, table, td, p, h1, a {{
+                    text-align: center;
+                    margin: 0 auto;
+                }}
+
+                h1 {{
+                    color: #4338CA;
+                    font-size: 40px;
+                    margin-bottom: 20px;
+                }}
+
+                .button-link, .button-link:link, .button-link:visited, .button-link:hover, .button-link:active {{
+                    background-color: #4338CA;
+                    border: none;
+                    color: white !important;
+                    padding: 15px 32px;
+                    text-decoration: none;
+                    font-size: 16px;
+                    border-radius: 5px;
+                    display: inline-block;
+                    margin-top: 20px;
+                    text-decoration: none;
+                }}
+            </style>
+        </head>
         <body>
-            <h1>Confirm your email</h1>
-            <p>Please confirm your email by clicking on the link: http://localhost:8000/auth/confirm-registration/{token}</p>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                    <td>
+                        <h1>BytePit</h1>
+                        <h3>Please confirm your email by clicking on the button:</h3>
+                        <a href="http://localhost:3000/confirm-email/{token}" class="button-link">CONFIRM</a>
+                    </td>
+                </tr>
+            </table>
         </body>
     </html>
+
     """
 
     message = MessageSchema(
-        subject="Lavoro - Confirm your email", recipients=[email], body=message_html, subtype=MessageType.html
+        subject="BytePit - Confirm your email", recipients=[email], body=message_html, subtype=MessageType.html
     )
 
     fm = FastMail(connection_config)
