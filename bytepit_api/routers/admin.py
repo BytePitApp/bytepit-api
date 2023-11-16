@@ -2,7 +2,7 @@ import uuid
 
 from typing import Annotated, List
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Response, status, HTTPException
 
 from bytepit_api.dependencies.auth_dependencies import get_current_admin_user
 from bytepit_api.models.auth_schemes import Role, User
@@ -27,7 +27,7 @@ def confirm_organiser(username: str, current_admin_user: Annotated[User, Depends
     result = set_approved_organiser(username)
     if result:
         return {"detail": f"Organiser {username} is now approved"}
-    return Response(status_code=status.HTTP_404_NOT_FOUND)
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
 
 @router.post("/change-role/{username}/{new_role}")
@@ -39,4 +39,4 @@ def change_role(
     result = set_user_role(username, new_role)
     if result:
         return {"detail": f"Role successfully changed to {new_role}"}
-    return Response(status_code=status.HTTP_404_NOT_FOUND)
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")

@@ -40,5 +40,5 @@ async def validation_exception_handler(request, exc):
         formatted_errors.append(formatted_message)
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={"errors": formatted_errors},
+        content={"detail": formatted_errors},
     )
