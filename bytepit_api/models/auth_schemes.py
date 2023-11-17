@@ -1,3 +1,4 @@
+import base64
 import inspect
 import uuid
 
@@ -5,7 +6,7 @@ from enum import Enum
 from typing import Annotated, Union
 
 from fastapi import Form, File, UploadFile
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, field_serializer, field_validator
 from pydantic_core import PydanticCustomError
 
 
@@ -89,6 +90,13 @@ class User(BaseModel):
     is_verified: bool
     approved_by_admin: bool
     image: Union[bytes, None] = None
+
+    @field_serializer("image")
+    @classmethod
+    def serialize_image(cls, image):
+        if image:
+            encoded_file_content = base64.b64encode(image).decode("utf-8")
+            return encoded_file_content
 
 
 class UserInDB(User):
