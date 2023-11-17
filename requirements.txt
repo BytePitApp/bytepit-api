@@ -1,0 +1,9 @@
+fastapi
+fastapi-mail
+pydantic[email]
+uvicorn
+requests
+python-multipart
+psycopg
+python-jose
+passlib[bcrypt]
