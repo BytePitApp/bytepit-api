@@ -4,7 +4,7 @@ import uuid
 from enum import Enum
 from typing import Annotated, Union
 
-from fastapi import Form
+from fastapi import Form, File, UploadFile
 from pydantic import BaseModel, EmailStr, field_validator
 from pydantic_core import PydanticCustomError
 
@@ -53,7 +53,7 @@ class RegistrationForm(BaseModel):
     surname: Annotated[str, Form()]
     email: Annotated[EmailStr, Form()]
     role: Annotated[RegisterRole, Form()]
-    # image: Annotated[str, Form()] = None
+    image: Annotated[UploadFile, File()] = None
 
     @field_validator("username")
     @classmethod
@@ -88,6 +88,7 @@ class User(BaseModel):
     surname: str
     is_verified: bool
     approved_by_admin: bool
+    image: Union[bytes, None]
 
 
 class UserInDB(User):
