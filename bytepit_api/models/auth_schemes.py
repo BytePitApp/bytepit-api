@@ -5,7 +5,8 @@ from enum import Enum
 from typing import Annotated, Union
 
 from fastapi import Form
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
+from pydantic_core import PydanticCustomError
 
 
 def as_form(cls):
@@ -53,6 +54,20 @@ class RegistrationForm(BaseModel):
     email: Annotated[EmailStr, Form()]
     role: Annotated[RegisterRole, Form()]
     # image: Annotated[str, Form()] = None
+
+    @field_validator("username")
+    @classmethod
+    def validate_username(cls, username):
+        if len(username) < 4:
+            raise PydanticCustomError("length", "Username must be at least 4 characters long")
+        return username
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, password):
+        if len(password) < 8:
+            raise PydanticCustomError("length", "Password must be at least 8 characters long")
+        return password
 
 
 @as_form
