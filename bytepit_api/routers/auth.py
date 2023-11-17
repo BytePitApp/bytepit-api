@@ -84,6 +84,7 @@ def login_for_access_token(response: Response, form_data: Annotated[LoginForm, D
 def logout(response: Response):
     expires = datetime.datetime.utcnow() + datetime.timedelta(seconds=1)
 
+    # this is needed because otherwise the Set-Cookie header is not properly propagated by azure
     response.set_cookie(
         key="access_token",
         value="",
