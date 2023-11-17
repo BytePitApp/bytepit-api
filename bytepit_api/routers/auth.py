@@ -30,7 +30,7 @@ async def register(form_data: Annotated[RegistrationForm, Depends()]):
         form_data.surname,
         form_data.email,
         form_data.role,
-        # form_data.image,
+        form_data.image,
     )
 
     if not confirmation_token:
@@ -41,6 +41,7 @@ async def register(form_data: Annotated[RegistrationForm, Depends()]):
 
     await send_verification_email(form_data.email, confirmation_token)
     return Response(status_code=status.HTTP_201_CREATED)
+
 
 
 @router.post("/confirm-registration/{verification_token}")
