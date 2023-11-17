@@ -1,5 +1,7 @@
 import os
 
+from urllib.parse import unquote
+
 from typing import Annotated, Dict, Optional
 
 from fastapi import Depends, HTTPException, status, Request
@@ -22,12 +24,13 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
         auto_error: bool = True,
     ):
         if not scopes:
-            scopes = {}
+            scopes = {} 
         flows = OAuthFlowsModel(password={"tokenUrl": tokenUrl, "scopes": scopes})
         super().__init__(flows=flows, scheme_name=scheme_name, auto_error=auto_error)
 
     async def __call__(self, request: Request) -> Optional[str]:
         authorization: str = request.cookies.get("access_token")
+        authorization = unquote(authorization)
 
         scheme, param = get_authorization_scheme_param(authorization)
         if not authorization or scheme.lower() != "bearer":
@@ -42,7 +45,7 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
         return param
 
 
-oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="/auth/login")
+oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="/api/auth/login")
 
 SECRET_KEY = os.environ["SECRET_KEY"]
 ALGORITHM = "HS256"
