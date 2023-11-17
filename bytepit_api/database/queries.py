@@ -32,15 +32,15 @@ def get_user_by_id(user_id: uuid.UUID):
         return None
 
 
-def create_user(username, password_hash, name, surname, email, role, confirmation_token):
+def create_user(username, password_hash, name, surname, email, role, image, confirmation_token):
     approved_by_admin = False if role == "organiser" else True
 
     user_insert_query = (
         """
-        INSERT INTO users (username, password_hash, name, surname, email, role, is_verified, approved_by_admin)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO users (username, password_hash, name, surname, email, role, image, is_verified, approved_by_admin)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """,
-        (username, password_hash, name, surname, email, role, False, approved_by_admin),
+        (username, password_hash, name, surname, email, role, image.file.read(), False, approved_by_admin),
     )
 
     token_insert_query = (
