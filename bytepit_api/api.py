@@ -9,7 +9,7 @@ from bytepit_api.routers.user import router as user_router
 from pydantic import ValidationError
 
 
-router = APIRouter()
+router = APIRouter(prefix="/api")
 router.include_router(admin_router)
 router.include_router(auth_router)
 router.include_router(user_router)
@@ -18,7 +18,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173", "https://salmon-stone-0a40c2203.4.azurestaticapps.net", "https://bytepit.cloud"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
