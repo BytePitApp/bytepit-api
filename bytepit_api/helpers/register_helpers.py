@@ -13,7 +13,7 @@ def generate_confirmation_token():
     return secrets.token_urlsafe(20)
 
 
-def register_user(username, password, name, surname, email, role, image):
+def register_user(username, password, name, surname, email, role, image=None):
     confirmation_token = generate_confirmation_token()
     password_hash = get_password_hash(password)
     result = create_user(username, password_hash, name, surname, email, role, image, confirmation_token)

@@ -53,7 +53,7 @@ class RegistrationForm(BaseModel):
     surname: Annotated[str, Form()]
     email: Annotated[EmailStr, Form()]
     role: Annotated[RegisterRole, Form()]
-    image: Annotated[UploadFile, File()] = None
+    image: Annotated[Union[UploadFile, None], File()] = None
 
     @field_validator("username")
     @classmethod
@@ -88,7 +88,7 @@ class User(BaseModel):
     surname: str
     is_verified: bool
     approved_by_admin: bool
-    image: Union[bytes, None]
+    image: Union[bytes, None] = None
 
 
 class UserInDB(User):
