@@ -32,8 +32,14 @@ async def register(form_data: Annotated[RegistrationForm, Depends()]):
         form_data.role,
         # form_data.image,
     )
-    await send_verification_email(form_data.email, confirmation_token)
 
+    if not confirmation_token:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Something went wrong. Please try again.",
+        )
+
+    await send_verification_email(form_data.email, confirmation_token)
     return Response(status_code=status.HTTP_201_CREATED)
 
 
