@@ -16,5 +16,7 @@ def generate_confirmation_token():
 def register_user(username, password, name, surname, email, role):
     confirmation_token = generate_confirmation_token()
     password_hash = get_password_hash(password)
-    create_user(username, password_hash, name, surname, email, role, confirmation_token)
+    result = create_user(username, password_hash, name, surname, email, role, confirmation_token)
+    if not result:
+        return None
     return confirmation_token

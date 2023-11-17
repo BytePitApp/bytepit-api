@@ -6,6 +6,8 @@ from bytepit_api.routers.admin import router as admin_router
 from bytepit_api.routers.auth import router as auth_router
 from bytepit_api.routers.user import router as user_router
 
+from pydantic import ValidationError
+
 
 router = APIRouter()
 router.include_router(admin_router)
@@ -37,6 +39,21 @@ async def validation_exception_handler(request, exc):
         else:
             error_field_name = error["loc"][1]
             formatted_message = f"{error_message}: {error_field_name}"
+        formatted_errors.append(formatted_message)
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={"detail": formatted_errors},
+    )
+
+
+@app.exception_handler(ValidationError)
+async def pydantic_validation_exception_handler(request, exc):
+    formatted_errors = []
+    error_details = exc.errors()
+    print(error_details)
+    for error in error_details:
+        error_message = error["msg"]
+        formatted_message = error_message
         formatted_errors.append(formatted_message)
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
