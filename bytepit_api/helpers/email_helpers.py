@@ -52,7 +52,7 @@ async def send_verification_email(email, token):
                     <td>
                         <h1>BytePit</h1>
                         <h3>Please confirm your email by clicking on the button:</h3>
-                        <a href="http://localhost:3000/confirm-email/{token}" class="button-link">CONFIRM</a>
+                        <a href="http://localhost:5173/confirm-email/{token}" class="button-link">CONFIRM</a>
                     </td>
                 </tr>
             </table>
