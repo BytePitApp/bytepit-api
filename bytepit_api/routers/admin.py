@@ -13,12 +13,12 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 
 @router.get("/list-users", response_model=List[User])
-def list_users():
+def list_users(current_admin_user: Annotated[User, Depends(get_current_admin_user)]):
     return get_users()
 
 
 @router.get("/unverified-organisers", response_model=List[User])
-def list_unverified_organisers():
+def list_unverified_organisers(current_admin_user: Annotated[User, Depends(get_current_admin_user)]):
     return get_unverified_organisers()
 
 
