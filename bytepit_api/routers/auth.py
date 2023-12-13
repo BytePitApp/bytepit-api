@@ -10,7 +10,7 @@ from bytepit_api.helpers.confirmation_helpers import activate_user
 from bytepit_api.helpers.email_helpers import send_verification_email
 from bytepit_api.helpers.login_helpers import authenticate_user, create_access_token
 from bytepit_api.helpers.register_helpers import register_user
-from bytepit_api.models.auth_schemes import LoginForm, RegistrationForm, Token
+from bytepit_api.models.dtos import LoginDTO, RegisterDTO, TokenDTO
 from bytepit_api.database.queries import get_user_by_email, get_user_by_username
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -19,7 +19,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
 @router.post("/register")
-async def register(form_data: Annotated[RegistrationForm, Depends()]):
+async def register(form_data: Annotated[RegisterDTO, Depends()]):
     if get_user_by_email(form_data.email) or get_user_by_username(form_data.username):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -58,8 +58,8 @@ def confirm_email(verification_token: str):
         )
 
 
-@router.post("/login", response_model=Token)
-def login_for_access_token(response: Response, form_data: Annotated[LoginForm, Depends()]):
+@router.post("/login", response_model=TokenDTO)
+def login_for_access_token(response: Response, form_data: Annotated[LoginDTO, Depends()]):
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -71,6 +71,12 @@ def login_for_access_token(response: Response, form_data: Annotated[LoginForm, D
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Users account inactive. Please verify your email before logging in.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if not user.approved_by_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Users account not approved by admin. Please wait for admin approval before logging in.",
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
