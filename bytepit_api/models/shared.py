@@ -23,4 +23,3 @@ def as_form(cls):
 
 class TokenData(BaseModel):
     email: Union[str, None] = None
-
