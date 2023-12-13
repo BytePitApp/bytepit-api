@@ -1,14 +1,15 @@
 import uuid
 
 from bytepit_api.database import db
-from bytepit_api.models.auth_schemes import RegisterRole, User, UserInDB
-
+from bytepit_api.models.db_models import User
+from bytepit_api.models.dtos import UserDTO
+from bytepit_api.models.enums import RegisterRole
 
 def get_user_by_username(username: str):
     query_tuple = ("SELECT * FROM users WHERE username = %s", (username,))
     result = db.execute_one(query_tuple)
     if result["result"]:
-        return UserInDB(**result["result"][0])
+        return User(**result["result"][0])
     else:
         return None
 
@@ -17,7 +18,7 @@ def get_user_by_email(email: str):
     query_tuple = ("SELECT * FROM users WHERE email = %s", (email,))
     result = db.execute_one(query_tuple)
     if result["result"]:
-        return UserInDB(**result["result"][0])
+        return User(**result["result"][0])
     else:
         return None
 
@@ -27,7 +28,7 @@ def get_user_by_id(user_id: uuid.UUID):
     result = db.execute_one(query_tuple)
 
     if result["result"]:
-        return UserInDB(**result["result"][0])
+        return User(**result["result"][0])
     else:
         return None
 
@@ -55,13 +56,13 @@ def create_user(username, password_hash, name, surname, email, role, image, conf
 def get_users():
     query_tuple = ("SELECT * FROM users", ())
     result = db.execute_one(query_tuple)
-    return [User(**user) for user in result["result"]]
+    return [UserDTO(**user) for user in result["result"]]
 
 
 def get_unverified_organisers():
     query_tuple = ("SELECT * FROM users WHERE role = 'organiser' AND approved_by_admin = false", ())
     result = db.execute_one(query_tuple)
-    return [User(**user) for user in result["result"]]
+    return [UserDTO(**user) for user in result["result"]]
 
 
 def set_verified_user(user_id: uuid.UUID):
@@ -89,7 +90,7 @@ def get_user_by_verification_token(verification_token: str):
     )
     result = db.execute_one(query_tuple)
     if result["result"]:
-        return UserInDB(**result["result"][0])
+        return User(**result["result"][0])
     else:
         return None
 
