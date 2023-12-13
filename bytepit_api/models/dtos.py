@@ -108,15 +108,15 @@ class CreateProblemDTO(BaseModel):
     
 
 class ModifyProblemDTO(BaseModel):
-    name: str
-    example_input: str
-    example_output: str
-    is_hidden: bool
-    num_of_points: float
-    runtime_limit: str
-    description: str
-    tests_dir: str
-    is_private: bool
+    name: Union[str, None] = None
+    example_input: Union[str, None] = None
+    example_output: Union[str, None] = None
+    is_hidden: Union[bool, None] = None
+    num_of_points: Union[float, None] = None
+    runtime_limit: Union[str, None] = None
+    description: Union[str, None] = None
+    tests_dir: Union[str, None] = None
+    is_private: Union[bool, None] = None
 
     @field_validator("num_of_points")
     @classmethod
@@ -145,9 +145,9 @@ class CreateCompetitionDTO(BaseModel):
 
 
 class ModifyCompetitionDTO(BaseModel):
-    name: str
-    description: str
-    start_time: str
-    end_time: str
+    name: Union[str, None] = None
+    description: Union[str, None] = None
+    start_time: Union[str, None] = None
+    end_time: Union[str, None] = None
     parent_id: Union[uuid.UUID, None] = None
-    problems: List[uuid.UUID]
+    problems: Union[List[uuid.UUID], None] = None
