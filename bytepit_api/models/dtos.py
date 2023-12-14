@@ -86,7 +86,7 @@ class ProblemDTO(BaseModel):
         if num_of_points <= 0:
             raise ValueError("num_of_points must be greater than 0")
         return num_of_points
-    
+
 
 class CreateProblemDTO(BaseModel):
     name: str
@@ -96,7 +96,7 @@ class CreateProblemDTO(BaseModel):
     num_of_points: float
     runtime_limit: str
     description: str
-    tests_dir: str
+    test_files: List[UploadFile] = File(...)
     is_private: bool
 
     @field_validator("num_of_points")

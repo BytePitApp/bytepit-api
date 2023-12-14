@@ -27,7 +27,7 @@ CREATE TABLE problems (
     num_of_points   REAL            NOT NULL CHECK (num_of_points > 0),
     runtime_limit   TIME            NOT NULL,
     description     TEXT            NOT NULL,
-    tests_dir       TEXT            NOT NULL,
+    organiser_id    uuid            NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     is_private      BOOLEAN         NOT NULL,
     created_on      TIMESTAMP       NOT NULL DEFAULT NOW()
 );
