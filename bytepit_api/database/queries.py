@@ -1,8 +1,8 @@
 import uuid
 
 from bytepit_api.database import db
-from bytepit_api.models.db_models import User
-from bytepit_api.models.dtos import UserDTO
+from bytepit_api.models.db_models import User, Problem
+from bytepit_api.models.dtos import UserDTO, ProblemDTO, CreateProblemDTO
 from bytepit_api.models.enums import RegisterRole
 
 def get_user_by_username(username: str):
@@ -107,5 +107,39 @@ def set_user_role(username: str, new_role: RegisterRole):
 
 def set_approved_organiser(username: str):
     query_tuple = ("UPDATE users SET approved_by_admin = true WHERE username = %s", (username,))
+    result = db.execute_one(query_tuple)
+    return result["affected_rows"] == 1
+
+
+def get_problems():
+    query_tuple = ("SELECT * FROM problems", ())
+    result = db.execute_one(query_tuple)
+    return [ProblemDTO(**problem) for problem in result["result"]]
+
+
+def get_problem_by_id(problem_id: uuid.UUID):
+    query_tuple = ("SELECT * FROM problems WHERE id = %s", (problem_id,))
+    result = db.execute_one(query_tuple)
+
+    if result["result"]:
+        return ProblemDTO(**result["result"][0])
+    else:
+        return None
+    
+
+def create_new_problem(name: str, example_input: str, example_output: str, is_hidden: bool,num_of_points: float,runtime_limit: str,description: str,is_private: bool):
+    problem_insert_query = (
+        """
+        INSERT INTO problems (name, example_input, example_output, is_hidden, num_of_points, runtime_limit, description, is_private)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """,
+        (name, example_input, example_output, is_hidden, num_of_points, runtime_limit, description, is_private),
+    )
+    result = db.execute_many([problem_insert_query])
+    return result["affected_rows"] == 1
+
+
+def delete_problem(problem_id: uuid.UUID):
+    query_tuple = ("DELETE FROM problems WHERE id = %s", (problem_id))
     result = db.execute_one(query_tuple)
     return result["affected_rows"] == 1

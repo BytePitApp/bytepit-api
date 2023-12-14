@@ -82,3 +82,9 @@ def get_current_admin_user(current_user: Annotated[UserDTO, Depends(get_current_
     if not current_user.role == "admin":
         raise HTTPException(status_code=400, detail="User is not admin")
     return current_user
+
+
+def get_current_organiser_user(current_user: Annotated[UserDTO, Depends(get_current_verified_user)]):
+    if not current_user.role == "organiser":
+        raise HTTPException(status_code=400, detail="User is not organiser")
+    return current_user
