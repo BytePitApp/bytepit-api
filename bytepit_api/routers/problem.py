@@ -1,14 +1,13 @@
 import uuid
-from typing import Union
 from typing import Annotated, List
 
-from fastapi import APIRouter, Depends, Response, status, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, Response, status, HTTPException
 
 from bytepit_api.dependencies.auth_dependencies import get_current_approved_organiser, get_current_admin_or_approved_organiuser_user
 from bytepit_api.models.dtos import ProblemDTO, CreateProblemDTO, ModifyProblemDTO
 from bytepit_api.database.queries import get_all_problems, get_problem_by_id, insert_problem
 from bytepit_api.helpers.blob_storage_helpers import upload_blob, get_file_by_problem_id_and_file_name
-from bytepit_api.helpers.problem_helpers import remove_problem, validate_inserted_problems
+from bytepit_api.helpers.problem_helpers import remove_problem, validate_inserted_problems, modify_problem_in_database, modify_problem_in_blob_storage
 
 
 router = APIRouter(prefix="/problems", tags=["problems"])
@@ -59,7 +58,7 @@ async def create_problem(
     return Response(status_code=status.HTTP_201_CREATED)
 
 
-@router.patch("/problem")
+@router.patch("/{problem_id}")
 def modify_problem(
     problem_id: uuid.UUID,
     form_data: Annotated[ModifyProblemDTO, Depends()],
@@ -71,10 +70,23 @@ def modify_problem(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Problem not found",
         )
-    problem_to_modify_without_id = problem_to_modify.model_dump(exclude={"id", "created_on"})
-    modify_object = form_data.model_dump(exclude_unset=True)
-    if not modify_object["test_files"]:
-        print("test_files")
+    if not modify_problem_in_database(problem_to_modify, form_data, problem_id):
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Something went wrong. Please try again.",
+        )
+    if form_data.test_files != []:
+        if not validate_inserted_problems(form_data.test_files):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid test files",
+            )
+        if not modify_problem_in_blob_storage(problem_id, form_data):
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Something went wrong. Please try again.",
+            )
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.delete("/{problem_id}")

@@ -1,5 +1,5 @@
 import uuid
-from azure.storage.blob import BlobServiceClient, ContainerClient
+from azure.storage.blob import BlobServiceClient
 from os import getenv
 from typing import BinaryIO
 from fastapi import HTTPException
@@ -43,11 +43,11 @@ def delete_blob(filename: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-def delete_all_blobs_by_problem_id(problemId: Union[int, uuid.UUID]):
+def delete_all_blobs_by_problem_id(problem_id: uuid.UUID):
     try:
         files_to_delete = blob_service_client \
             .get_container_client(container=container) \
-            .list_blobs(name_starts_with=f"{problemId}")
+            .list_blobs(name_starts_with=f"{problem_id}")
 
         for file in files_to_delete:
             delete_blob(file.name)

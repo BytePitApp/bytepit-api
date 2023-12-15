@@ -70,21 +70,21 @@ class TokenDTO(BaseModel):
 
 
 class ProblemDTO(BaseModel):
-    id: uuid.UUID
-    name: str
-    example_input: str
-    example_output: str
-    is_hidden: bool
-    num_of_points: float
-    runtime_limit: time
-    description: str
-    is_private: bool
-    created_on: datetime
+    id: Union[uuid.UUID, None] = None
+    name: Union[str, None] = None
+    example_input: Union[str, None] = None
+    example_output: Union[str, None] = None
+    is_hidden: Union[bool, None] = None
+    num_of_points: Union[float, None] = None
+    runtime_limit: Union[time, None] = None
+    description: Union[str, None] = None
+    is_private: Union[bool, None] = None
+    created_on: Union[datetime, None] = None
 
     @field_validator("num_of_points")
     @classmethod
     def validate_num_of_points(cls, num_of_points):
-        if num_of_points <= 0:
+        if num_of_points is not None and num_of_points <= 0:
             raise ValueError("num_of_points must be greater than 0")
         return num_of_points
 
@@ -116,7 +116,7 @@ class ModifyProblemDTO(BaseModel):
     num_of_points: Union[float, None] = None
     runtime_limit: Union[str, None] = None
     description: Union[str, None] = None
-    test_files: List[UploadFile] = File(None)
+    test_files: List[UploadFile] = []
     is_private: Union[bool, None] = None
 
     @field_validator("num_of_points")
@@ -125,15 +125,6 @@ class ModifyProblemDTO(BaseModel):
         if num_of_points is not None and num_of_points <= 0:
             raise ValueError("num_of_points must be greater than 0")
         return num_of_points
-
-    @model_validator(mode="before")
-    @classmethod
-    def validate_data(cls, data):
-        print("hello")
-        print(type(data["test_files"]))
-        if type(data["test_files"]) == str:
-            data["test_files"] = []
-        return data
 
 
 class CompetitionDTO(BaseModel):

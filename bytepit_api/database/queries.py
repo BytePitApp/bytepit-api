@@ -1,8 +1,8 @@
 import uuid
 
 from bytepit_api.database import db
-from bytepit_api.models.db_models import User, Problem
-from bytepit_api.models.dtos import UserDTO, ProblemDTO, CreateProblemDTO
+from bytepit_api.models.db_models import User
+from bytepit_api.models.dtos import UserDTO, ProblemDTO
 from bytepit_api.models.enums import RegisterRole
 
 def get_user_by_username(username: str):
@@ -154,3 +154,16 @@ def get_organisers_problems(organiser_id: uuid.UUID):
         return [ProblemDTO(**problem) for problem in result["result"]]
     else:
         return None
+
+
+def modify_problem_by_id(problem_id: uuid.UUID, problem: ProblemDTO):
+    query_tuple = (
+        """
+        UPDATE problems
+        SET name = %s, example_input = %s, example_output = %s, is_hidden = %s, num_of_points = %s, runtime_limit = %s, description = %s, is_private = %s
+        WHERE id = %s
+        """,
+        (problem.name, problem.example_input, problem.example_output, problem.is_hidden, problem.num_of_points, problem.runtime_limit, problem.description, problem.is_private, problem_id),
+    )
+    result = db.execute_one(query_tuple)
+    return result["affected_rows"] == 1
