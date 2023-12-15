@@ -111,7 +111,7 @@ def set_approved_organiser(username: str):
     return result["affected_rows"] == 1
 
 
-def get_problems():
+def get_all_problems():
     query_tuple = ("SELECT * FROM problems", ())
     result = db.execute_one(query_tuple)
     return [ProblemDTO(**problem) for problem in result["result"]]
@@ -120,26 +120,37 @@ def get_problems():
 def get_problem_by_id(problem_id: uuid.UUID):
     query_tuple = ("SELECT * FROM problems WHERE id = %s", (problem_id,))
     result = db.execute_one(query_tuple)
-
     if result["result"]:
         return ProblemDTO(**result["result"][0])
     else:
         return None
     
 
-def create_new_problem(name: str, example_input: str, example_output: str, is_hidden: bool,num_of_points: float,runtime_limit: str,description: str,is_private: bool):
+def insert_problem(name: str, example_input: str, example_output: str, is_hidden: bool, num_of_points: float, runtime_limit: str, organiser_id: uuid.UUID, description: str, is_private: bool):
     problem_insert_query = (
         """
-        INSERT INTO problems (name, example_input, example_output, is_hidden, num_of_points, runtime_limit, description, is_private)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO problems (name, example_input, example_output, is_hidden, num_of_points, runtime_limit, organiser_id, description, is_private)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
         """,
-        (name, example_input, example_output, is_hidden, num_of_points, runtime_limit, description, is_private),
+        (name, example_input, example_output, is_hidden, num_of_points, runtime_limit, organiser_id, description, is_private),
     )
-    result = db.execute_many([problem_insert_query])
-    return result["affected_rows"] == 1
+    result = db.execute_one(problem_insert_query)
+    if result["affected_rows"] == 1:
+        return result["result"][0]["id"]
+    else:
+        return result["affected_rows"] == 1
 
 
-def delete_problem(problem_id: uuid.UUID):
-    query_tuple = ("DELETE FROM problems WHERE id = %s", (problem_id))
+def delete_problem_by_problem_id(problem_id: uuid.UUID):
+    query_tuple = ("DELETE FROM problems WHERE id = %s", (problem_id,))
     result = db.execute_one(query_tuple)
     return result["affected_rows"] == 1
+
+
+def get_organisers_problems(organiser_id: uuid.UUID):
+    query_tuple = ("SELECT * FROM problems WHERE organiser_id = %s", (organiser_id,))
+    result = db.execute_one(query_tuple)
+    if result["result"]:
+        return [ProblemDTO(**problem) for problem in result["result"]]
+    else:
+        return None

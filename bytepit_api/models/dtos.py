@@ -1,10 +1,11 @@
 import base64
 import uuid
+from datetime import datetime, time
 
 from typing import Annotated, Union, List
 
 from fastapi import Form, File, UploadFile
-from pydantic import BaseModel, EmailStr, field_validator, field_serializer
+from pydantic import BaseModel, EmailStr, field_validator, field_serializer, model_validator
 from pydantic_core import PydanticCustomError
 
 from bytepit_api.models.shared import as_form
@@ -69,16 +70,16 @@ class TokenDTO(BaseModel):
 
 
 class ProblemDTO(BaseModel):
+    id: uuid.UUID
     name: str
     example_input: str
     example_output: str
     is_hidden: bool
     num_of_points: float
-    runtime_limit: str
+    runtime_limit: time
     description: str
-    tests_dir: str
     is_private: bool
-    created_on: str
+    created_on: datetime
 
     @field_validator("num_of_points")
     @classmethod
@@ -96,7 +97,7 @@ class CreateProblemDTO(BaseModel):
     num_of_points: float
     runtime_limit: str
     description: str
-    test_files: List[UploadFile] = File(...)
+    test_files: List[UploadFile]
     is_private: bool
 
     @field_validator("num_of_points")
@@ -115,15 +116,24 @@ class ModifyProblemDTO(BaseModel):
     num_of_points: Union[float, None] = None
     runtime_limit: Union[str, None] = None
     description: Union[str, None] = None
-    tests_dir: Union[str, None] = None
+    test_files: List[UploadFile] = File(None)
     is_private: Union[bool, None] = None
 
     @field_validator("num_of_points")
     @classmethod
     def validate_num_of_points(cls, num_of_points):
-        if num_of_points <= 0:
+        if num_of_points is not None and num_of_points <= 0:
             raise ValueError("num_of_points must be greater than 0")
         return num_of_points
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_data(cls, data):
+        print("hello")
+        print(type(data["test_files"]))
+        if type(data["test_files"]) == str:
+            data["test_files"] = []
+        return data
 
 
 class CompetitionDTO(BaseModel):

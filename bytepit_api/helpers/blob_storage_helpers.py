@@ -20,7 +20,7 @@ def upload_blob(filename: str, data: BinaryIO):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-def get_blob(filename: str):
+def get_file_by_problem_id_and_file_name(filename: str):
     try:
         blob_client = blob_service_client.get_blob_client(container=container, blob=filename)
         return response_stream(data=blob_client.download_blob().chunks(), download=False)
@@ -43,7 +43,7 @@ def delete_blob(filename: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-def delete_all_blobs_by_id(problemId: Union[int, uuid.UUID]):
+def delete_all_blobs_by_problem_id(problemId: Union[int, uuid.UUID]):
     try:
         files_to_delete = blob_service_client \
             .get_container_client(container=container) \

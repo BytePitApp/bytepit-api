@@ -38,7 +38,7 @@ CREATE TABLE competition (
     description     TEXT            NOT NULL,
     start_time      TIMESTAMP       NOT NULL,
     end_time        TIMESTAMP       NOT NULL,
-    parentId        UUID            NOT NULL REFERENCES competition(id) ON DELETE CASCADE,
+    parent_id       UUID            NOT NULL REFERENCES competition(id) ON DELETE CASCADE,
     problems        UUID[]
 );
 
