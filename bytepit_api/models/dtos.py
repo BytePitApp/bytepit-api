@@ -78,6 +78,7 @@ class ProblemDTO(BaseModel):
     num_of_points: Union[float, None] = None
     runtime_limit: Union[time, None] = None
     description: Union[str, None] = None
+    organiser_id: Union[uuid.UUID, None] = None
     is_private: Union[bool, None] = None
     created_on: Union[datetime, None] = None
 

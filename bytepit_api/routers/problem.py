@@ -21,13 +21,13 @@ def list_problems():
 @router.get("/{problem_id}", response_model=ProblemDTO)
 def get_problem(problem_id: uuid.UUID):
     problem = get_problem_by_id(problem_id)
-    if problem:
-        return problem
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Problem not found")
+    if not problem:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Problem not found")
+    return problem
 
 
 @router.post("")
-async def create_problem(
+def create_problem(
     form_data: Annotated[CreateProblemDTO, Depends()],
     current_user: Annotated[uuid.UUID, Depends(get_current_approved_organiser)]
 ):
@@ -104,8 +104,8 @@ def delete_problem(
 
 
 @router.get("/{problem_id}/{file_name}")
-async def get_file(problem_id: str, file_name: str):
+def get_file(problem_id: str, file_name: str):
     file = get_file_by_problem_id_and_file_name(f"{problem_id}/{file_name}")
-    if file:
-        return file
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
+    if not file:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
+    return file

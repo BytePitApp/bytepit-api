@@ -37,6 +37,7 @@ class Problem(BaseModel):
     num_of_points: float
     runtime_limit: str
     description: str
+    organiser_id: uuid.UUID
     is_private: bool
     created_on: str
 
