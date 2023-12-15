@@ -37,7 +37,6 @@ class Problem(BaseModel):
     num_of_points: float
     runtime_limit: str
     description: str
-    tests_dir: str
     is_private: bool
     created_on: str
 
