@@ -7,6 +7,7 @@ from bytepit_api.routers.auth import router as auth_router
 from bytepit_api.routers.user import router as user_router
 from bytepit_api.routers.problem import router as problem_router
 from bytepit_api.routers.organiser import router as organiser_router
+from bytepit_api.routers.competition import router as competition_router
 
 from pydantic import ValidationError
 
@@ -17,6 +18,7 @@ router.include_router(auth_router)
 router.include_router(user_router)
 router.include_router(problem_router)
 router.include_router(organiser_router)
+router.include_router(competition_router)
 
 app = FastAPI()
 
