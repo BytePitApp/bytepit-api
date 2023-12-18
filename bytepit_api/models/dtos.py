@@ -78,6 +78,7 @@ class ProblemDTO(BaseModel):
     num_of_points: Union[float, None] = None
     runtime_limit: Union[time, None] = None
     description: Union[str, None] = None
+    organiser_id: Union[uuid.UUID, None] = None
     is_private: Union[bool, None] = None
     created_on: Union[datetime, None] = None
 
@@ -127,13 +128,31 @@ class ModifyProblemDTO(BaseModel):
         return num_of_points
 
 
+class TrophyDTO(BaseModel):
+    id: uuid.UUID
+    competition_id: Union[uuid.UUID, None] = None
+    user_id: Union[uuid.UUID, None] = None
+    position: int
+    icon: Union[bytes, None] = None
+
+    @field_serializer("icon")
+    @classmethod
+    def serialize_icon(cls, icon):
+        if icon:
+            encoded_file_content = base64.b64encode(icon).decode("utf-8")
+            return encoded_file_content
+
+
 class CompetitionDTO(BaseModel):
+    id: uuid.UUID
     name: str
     description: str
-    start_time: str
-    end_time: str
+    start_time: datetime
+    end_time: datetime
     parent_id: Union[uuid.UUID, None] = None
-    problems: List[ProblemDTO]
+    organiser_id: Union[uuid.UUID, None] = None
+    problems: Union[List[ProblemDTO], List[uuid.UUID]] 
+    trophies: Union[List[TrophyDTO], None, List[uuid.UUID]] = None
 
 
 class CreateCompetitionDTO(BaseModel):
@@ -143,6 +162,15 @@ class CreateCompetitionDTO(BaseModel):
     end_time: str
     parent_id: Union[uuid.UUID, None] = None
     problems: List[uuid.UUID]
+    first_place_trophy: Annotated[Union[UploadFile, None], File()] = None
+    second_place_trophy: Annotated[Union[UploadFile, None], File()] = None
+    third_place_trophy: Annotated[Union[UploadFile, None], File()] = None
+
+    @model_validator(mode='after')
+    def validate_start_time(self):
+        if self.start_time >= self.end_time:
+            raise ValueError("start_time must be before end_time")
+        return self
 
 
 class ModifyCompetitionDTO(BaseModel):
@@ -151,4 +179,13 @@ class ModifyCompetitionDTO(BaseModel):
     start_time: Union[str, None] = None
     end_time: Union[str, None] = None
     parent_id: Union[uuid.UUID, None] = None
-    problems: Union[List[uuid.UUID], None] = None
+    problems: List[uuid.UUID] = []
+    first_place_trophy: Union[UploadFile, None] =  None
+    second_place_trophy: Union[UploadFile, None] = None
+    third_place_trophy: Union[UploadFile, None] = None
+
+    @model_validator(mode='after')
+    def validate_start_time(self):
+        if self.start_time is not None and self.end_time is not None and self.start_time >= self.end_time:
+            raise ValueError("start_time must be before end_time")
+        return self

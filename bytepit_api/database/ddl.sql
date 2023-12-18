@@ -38,20 +38,14 @@ CREATE TABLE competition (
     description     TEXT            NOT NULL,
     start_time      TIMESTAMP       NOT NULL,
     end_time        TIMESTAMP       NOT NULL,
-    parent_id       UUID            NOT NULL REFERENCES competition(id) ON DELETE CASCADE,
+    parent_id       UUID            REFERENCES competition(id) ON DELETE CASCADE,
+    organiser_id    UUID            NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     problems        UUID[]
 );
 
 CREATE TABLE competition_participations (
     id              uuid            DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id         UUID            NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    competition_id  UUID            NOT NULL REFERENCES competition(id) ON DELETE CASCADE,
-    num_of_points   REAL            NOT NULL CHECK (num_of_points > 0)
-);
-
-CREATE TABLE problems_on_competitions (
-    id              uuid            DEFAULT uuid_generate_v4() PRIMARY KEY,
-    problem_id      UUID            NOT NULL REFERENCES problems(id) ON DELETE CASCADE,
     competition_id  UUID            NOT NULL REFERENCES competition(id) ON DELETE CASCADE,
     num_of_points   REAL            NOT NULL CHECK (num_of_points > 0)
 );
@@ -70,7 +64,7 @@ CREATE TABLE problem_result (
 CREATE TABLE trophies (
     id              uuid            DEFAULT uuid_generate_v4() PRIMARY KEY,
     competition_id  UUID            NOT NULL REFERENCES competition(id) ON DELETE CASCADE,
-    user_id         UUID            NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id         UUID            REFERENCES users(id) ON DELETE CASCADE,
     position        SMALLINT        NOT NULL CHECK (position > 0),
     icon            BYTEA           NOT NULL
 );
