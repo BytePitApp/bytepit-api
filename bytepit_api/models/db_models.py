@@ -56,4 +56,5 @@ class Competition(BaseModel):
     start_time: str
     end_time: str
     parent_id: Union[uuid.UUID, None] = None
+    organiser_id: uuid.UUID
     problems: List[uuid.UUID]
