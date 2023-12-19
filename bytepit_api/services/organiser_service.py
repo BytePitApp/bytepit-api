@@ -1,21 +1,29 @@
 import uuid
-
 from fastapi import status, HTTPException
 
-from bytepit_api.models.dtos import CompetitionDTO, CreateCompetitionDTO, ModifyCompetitionDTO
-from bytepit_api.database.queries import get_every_competition_by_organiser_id, get_trophies_by_ids
-from bytepit_api.helpers.competition_helpers import map_competition_dict_to_dto
+import bytepit_api.database.organiser_queries as organiser_queries
+import bytepit_api.helpers.competition_helpers as competition_helpers
 
 
 def get_all_competitions_by_organiser_id(organiser_id: uuid.UUID):
-    competitions_dict = get_every_competition_by_organiser_id(organiser_id)
+    competitions_dict = organiser_queries.get_competitions_by_organiser_id(organiser_id)
     if not competitions_dict:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="No competition found",
+            detail=f"No competition with organiser id {organiser_id} found",
         )
     competitions = []
     for competition in competitions_dict:
-        trophies = get_trophies_by_ids(competition["trophies"])
-        competitions.append(map_competition_dict_to_dto(competition, trophies))
+        trophies = organiser_queries.get_trophies_by_ids(competition["trophies"])
+        competitions.append(competition_helpers.map_competition_dict_to_dto(competition, trophies))
     return competitions
+
+
+def get_problems_by_organiser_id(organiser_id: uuid.UUID):
+    problems = organiser_queries.get_organisers_problems(organiser_id)
+    if problems is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No problems with organiser id {organiser_id} found"
+        )
+    return problems
