@@ -1,7 +1,7 @@
 from fastapi import UploadFile
 from typing import Union
 
-from bytepit_api.models.dtos import CompetitionDTO, ProblemDTO, TrophyDTO
+from bytepit_api.models.dtos import CompetitionDTO, ProblemDTO
 
 
 def validate_trophies(first_place_trophy: Union[UploadFile, None] = None, second_place_trophy: Union[UploadFile, None] = None, third_place_trophy: Union[UploadFile, None] = None):

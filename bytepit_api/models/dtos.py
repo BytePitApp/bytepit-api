@@ -62,7 +62,7 @@ class UserDTO(BaseModel):
         if image:
             encoded_file_content = base64.b64encode(image).decode("utf-8")
             return encoded_file_content
-        
+
 
 class TokenDTO(BaseModel):
     access_token: str
@@ -90,16 +90,17 @@ class ProblemDTO(BaseModel):
         return num_of_points
 
 
+@as_form
 class CreateProblemDTO(BaseModel):
-    name: str
-    example_input: str
-    example_output: str
-    is_hidden: bool
-    num_of_points: float
-    runtime_limit: str
-    description: str
-    test_files: List[UploadFile]
-    is_private: bool
+    name:  Annotated[str, Form()]
+    example_input: Annotated[str, Form()]
+    example_output: Annotated[str, Form()]
+    is_hidden: Annotated[bool, Form()]
+    num_of_points: Annotated[float, Form()]
+    runtime_limit: Annotated[str, Form()]
+    description: Annotated[str, Form()]
+    test_files: Annotated[List[UploadFile], Form()]
+    is_private: Annotated[bool, Form()]
 
     @field_validator("num_of_points")
     @classmethod
@@ -110,15 +111,15 @@ class CreateProblemDTO(BaseModel):
     
 
 class ModifyProblemDTO(BaseModel):
-    name: Union[str, None] = None
-    example_input: Union[str, None] = None
-    example_output: Union[str, None] = None
-    is_hidden: Union[bool, None] = None
-    num_of_points: Union[float, None] = None
-    runtime_limit: Union[str, None] = None
-    description: Union[str, None] = None
-    test_files: List[UploadFile] = []
-    is_private: Union[bool, None] = None
+    name: Annotated[Union[str, None], Form()] = None
+    example_input: Annotated[Union[str, None], Form()] = None
+    example_output: Annotated[Union[str, None], Form()] = None
+    is_hidden: Annotated[Union[bool, None], Form()] = None
+    num_of_points: Annotated[Union[float, None], Form()] = None
+    runtime_limit: Annotated[Union[str, None], Form()] = None
+    description: Annotated[Union[str, None], Form()] = None
+    test_files: Annotated[List[UploadFile], Form()] = []
+    is_private: Annotated[Union[bool, None], Form()] = None
 
     @field_validator("num_of_points")
     @classmethod
@@ -155,13 +156,14 @@ class CompetitionDTO(BaseModel):
     trophies: Union[List[TrophyDTO], None, List[uuid.UUID]] = None
 
 
+@as_form
 class CreateCompetitionDTO(BaseModel):
-    name: str
-    description: str
-    start_time: str
-    end_time: str
-    parent_id: Union[uuid.UUID, None] = None
-    problems: List[uuid.UUID]
+    name: Annotated[str, Form()]
+    description: Annotated[str, Form()]
+    start_time: Annotated[str, Form()]
+    end_time: Annotated[str, Form()]
+    parent_id: Annotated[Union[uuid.UUID, None], Form()] = None
+    problems: Annotated[List[uuid.UUID], Form()]
     first_place_trophy: Annotated[Union[UploadFile, None], File()] = None
     second_place_trophy: Annotated[Union[UploadFile, None], File()] = None
     third_place_trophy: Annotated[Union[UploadFile, None], File()] = None
@@ -172,17 +174,17 @@ class CreateCompetitionDTO(BaseModel):
             raise ValueError("start_time must be before end_time")
         return self
 
-
+@as_form
 class ModifyCompetitionDTO(BaseModel):
-    name: Union[str, None] = None
-    description: Union[str, None] = None
-    start_time: Union[str, None] = None
-    end_time: Union[str, None] = None
-    parent_id: Union[uuid.UUID, None] = None
-    problems: List[uuid.UUID] = []
-    first_place_trophy: Union[UploadFile, None] =  None
-    second_place_trophy: Union[UploadFile, None] = None
-    third_place_trophy: Union[UploadFile, None] = None
+    name: Annotated[Union[str, None], Form()] = None
+    description: Annotated[Union[str, None], Form()] = None
+    start_time: Annotated[Union[str, None], Form()] = None
+    end_time: Annotated[Union[str, None], Form()] = None
+    parent_id: Annotated[Union[uuid.UUID, None], Form()] = None
+    problems: Annotated[List[uuid.UUID], Form()] = []
+    first_place_trophy: Annotated[Union[UploadFile, None], File()] =  None
+    second_place_trophy: Annotated[Union[UploadFile, None], File()] = None
+    third_place_trophy: Annotated[Union[UploadFile, None], File()] = None
 
     @model_validator(mode='after')
     def validate_start_time(self):
