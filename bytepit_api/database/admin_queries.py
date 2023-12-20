@@ -1,7 +1,8 @@
 import uuid
+
+from bytepit_api.database import db
 from bytepit_api.models.dtos import UserDTO
 from bytepit_api.models.db_models import User
-from bytepit_api.database import db
 from bytepit_api.models.enums import RegisterRole
 
 
@@ -9,7 +10,7 @@ def get_users():
     query_tuple = ("SELECT * FROM users", ())
     result = db.execute_one(query_tuple)
     if result["result"]:
-        return [UserDTO(**user) for user in result["result"]]
+        return [User(**user) for user in result["result"]]
     return None
 
 
@@ -23,11 +24,11 @@ def get_user_by_id(user_id: uuid.UUID):
         return None
 
 
-def get_unverified_organisers():
+def get_unapproved_organisers():
     query_tuple = ("SELECT * FROM users WHERE role = 'organiser' AND approved_by_admin = false", ())
     result = db.execute_one(query_tuple)
     if result["result"]:
-        return [UserDTO(**user) for user in result["result"]]
+        return [User(**user) for user in result["result"]]
     return None
 
 

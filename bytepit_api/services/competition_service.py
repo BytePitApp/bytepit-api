@@ -1,46 +1,76 @@
 import uuid
 from fastapi import status, HTTPException, Response
 
-import bytepit_api.database.competition_queries as competition_queries
-import bytepit_api.database.trophies_queries as trophies_queries
+from bytepit_api.database import competition_queries, problem_queries
 import bytepit_api.helpers.competition_helpers as competition_helpers
 
-from bytepit_api.models.dtos import CreateCompetitionDTO, ModifyCompetitionDTO
+from bytepit_api.models.dtos import CompetitionDTO, CreateCompetitionDTO, ModifyCompetitionDTO, ProblemDTO, TrophyDTO
 
 
 def get_all_competitions():
-    competitions_dict = competition_queries.get_competitions()
-    competitions = []
-    for competition in competitions_dict:
-        trophies = trophies_queries.get_trophies_by_ids(competition["trophies"])
-        competitions.append(competition_helpers.map_competition_dict_to_dto(competition, trophies))
-    return competitions
+    competitions = competition_queries.get_competitions()
+    competitions_dtos = []
+    for competition in competitions:
+        problems = problem_queries.get_problems_by_competition(competition.id)
+        trophies = competition_queries.get_trophies_by_competition(competition.id)
+
+        competition_dict = competition.model_dump(exclude={"problems"})
+        competition_dto = CompetitionDTO(**competition_dict)
+        competition_dto.problems = [ProblemDTO(**problem.model_dump()) for problem in problems]
+        competition_dto.trophies = [TrophyDTO(**trophy.model_dump()) for trophy in trophies]
+        competitions_dtos.append(competition_dto)
+
+    return competitions_dtos
 
 
-def get_every_active_competition():
-    competitions_dict = competition_queries.get_active_competitions()
-    competitions = []
-    for competition in competitions_dict:
-        trophies = trophies_queries.get_trophies_by_ids(competition["trophies"])
-        competitions.append(competition_helpers.map_competition_dict_to_dto(competition, trophies))
-    return competitions
+def get_active_competitions():
+    competitions = competition_queries.get_active_competitions()
+    competitions_dtos = []
+    for competition in competitions:
+        problems = problem_queries.get_problems_by_competition(competition.id)
+        trophies = competition_queries.get_trophies_by_competition(competition.id)
+
+        competition_dict = competition.model_dump(exclude={"problems"})
+        competition_dto = CompetitionDTO(**competition_dict)
+        competition_dto.problems = [ProblemDTO(**problem.model_dump()) for problem in problems]
+        competition_dto.trophies = [TrophyDTO(**trophy.model_dump()) for trophy in trophies]
+        competitions_dtos.append(competition_dto)
+
+    return competitions_dtos
 
 
-def get_one_random_competition():
-    competition_dict = competition_queries.get_random_competition()
-    trophies = trophies_queries.get_trophies_by_ids(competition_dict["trophies"])
-    return competition_helpers.map_competition_dict_to_dto(competition_dict, trophies)
-
-
-def get_one_competition(competition_id: uuid.UUID):
-    competition_dict = competition_queries.get_competition(competition_id)
-    if not competition_dict:
+def get_random_competition():
+    competition = competition_queries.get_random_competition()
+    if not competition:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="No competition found",
+            detail="No competitions found",
         )
-    trophies = trophies_queries.get_trophies_by_ids(competition_dict["trophies"])
-    return competition_helpers.map_competition_dict_to_dto(competition_dict, trophies)
+    problems = problem_queries.get_problems_by_competition(competition.id)
+    trophies = competition_queries.get_trophies_by_competition(competition.id)
+
+    competition_dict = competition.model_dump(exclude={"problems"})
+    competition_dto = CompetitionDTO(**competition_dict)
+    competition_dto.problems = [ProblemDTO(**problem.model_dump()) for problem in problems]
+    competition_dto.trophies = [TrophyDTO(**trophy.model_dump()) for trophy in trophies]
+    return competition_dto
+
+
+def get_competition(competition_id: uuid.UUID):
+    competition = competition_queries.get_competition(competition_id)
+    if not competition:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No competition with id {competition_id} found",
+        )
+    problems = problem_queries.get_problems_by_competition(competition.id)
+    trophies = competition_queries.get_trophies_by_competition(competition.id)
+
+    competition_dict = competition.model_dump(exclude={"problems"})
+    competition_dto = CompetitionDTO(**competition_dict)
+    competition_dto.problems = [ProblemDTO(**problem.model_dump()) for problem in problems]
+    competition_dto.trophies = [TrophyDTO(**trophy.model_dump()) for trophy in trophies]
+    return competition_dto
 
 
 def create_competition(form_data: CreateCompetitionDTO, current_user: uuid.UUID):
@@ -50,7 +80,9 @@ def create_competition(form_data: CreateCompetitionDTO, current_user: uuid.UUID)
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid problems",
         )
-    if not competition_helpers.validate_trophies(form_data.first_place_trophy, form_data.second_place_trophy, form_data.third_place_trophy):
+    if not competition_helpers.validate_trophies(
+        form_data.first_place_trophy, form_data.second_place_trophy, form_data.third_place_trophy
+    ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid trophies",
@@ -69,9 +101,9 @@ def create_competition(form_data: CreateCompetitionDTO, current_user: uuid.UUID)
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Something went wrong. Please try again.",
         )
-    trophies_queries.insert_trophy(result, 1, form_data.first_place_trophy)
-    trophies_queries.insert_trophy(result, 2, form_data.second_place_trophy)
-    trophies_queries.insert_trophy(result, 3, form_data.third_place_trophy)
+    competition_queries.insert_trophy(result, 1, form_data.first_place_trophy)
+    competition_queries.insert_trophy(result, 2, form_data.second_place_trophy)
+    competition_queries.insert_trophy(result, 3, form_data.third_place_trophy)
     return Response(status_code=status.HTTP_201_CREATED)
 
 
@@ -95,29 +127,37 @@ def modify_competition(competition_id: uuid.UUID, form_data: ModifyCompetitionDT
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid problems",
             )
-    competition_to_modify = competition_queries.get_competition_without_trophies(competition_id)
+    competition_to_modify = competition_queries.get_competition(competition_id)
     if not competition_to_modify:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Competition not found",
         )
-    modified_fields = form_data.model_dump(exclude_none=True, exclude={"first_place_trophy", "second_place_trophy", "third_place_trophy"})
+    modified_fields = form_data.model_dump(
+        exclude_none=True, exclude={"first_place_trophy", "second_place_trophy", "third_place_trophy"}
+    )
     modified_object = competition_to_modify.model_copy(update=modified_fields)
     if not competition_queries.modify_competition(competition_id, modified_object):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Something went wrong. Please try again.",
         )
-    if form_data.first_place_trophy is not None or form_data.second_place_trophy is not None or form_data.third_place_trophy is not None:
-        if not competition_helpers.validate_trophies(form_data.first_place_trophy, form_data.second_place_trophy, form_data.third_place_trophy):
+    if (
+        form_data.first_place_trophy is not None
+        or form_data.second_place_trophy is not None
+        or form_data.third_place_trophy is not None
+    ):
+        if not competition_helpers.validate_trophies(
+            form_data.first_place_trophy, form_data.second_place_trophy, form_data.third_place_trophy
+        ):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid trophies",
             )
-        trophies_queries.delete_trophy_by_competition_id(competition_id)
-        trophies_queries.insert_trophy(competition_id, 1, form_data.first_place_trophy)
-        trophies_queries.insert_trophy(competition_id, 2, form_data.second_place_trophy)
-        trophies_queries.insert_trophy(competition_id, 3, form_data.third_place_trophy)
+        competition_queries.delete_trophy_by_competition_id(competition_id)
+        competition_queries.insert_trophy(competition_id, 1, form_data.first_place_trophy)
+        competition_queries.insert_trophy(competition_id, 2, form_data.second_place_trophy)
+        competition_queries.insert_trophy(competition_id, 3, form_data.third_place_trophy)
     return Response(status_code=status.HTTP_200_OK)
 
 

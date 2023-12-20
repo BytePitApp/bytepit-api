@@ -1,7 +1,8 @@
 import base64
 import uuid
 
-from typing import Union, List
+from datetime import datetime
+from typing import List, Union
 
 from pydantic import BaseModel, field_serializer, field_validator
 
@@ -26,7 +27,7 @@ class User(BaseModel):
         if image:
             encoded_file_content = base64.b64encode(image).decode("utf-8")
             return encoded_file_content
-        
+
 
 class Problem(BaseModel):
     id: uuid.UUID
@@ -35,11 +36,11 @@ class Problem(BaseModel):
     example_output: str
     is_hidden: bool
     num_of_points: float
-    runtime_limit: str
+    runtime_limit: float
     description: str
     organiser_id: uuid.UUID
     is_private: bool
-    created_on: str
+    created_on: datetime
 
     @field_validator("num_of_points")
     @classmethod
@@ -53,8 +54,23 @@ class Competition(BaseModel):
     id: uuid.UUID
     name: str
     description: str
-    start_time: str
-    end_time: str
+    start_time: datetime
+    end_time: datetime
     parent_id: Union[uuid.UUID, None] = None
     organiser_id: uuid.UUID
     problems: List[uuid.UUID]
+
+
+class Trophy(BaseModel):
+    id: uuid.UUID
+    competition_id: uuid.UUID
+    position: int
+    user_id: Union[uuid.UUID, None] = None
+    icon: str
+
+    @field_serializer("icon")
+    @classmethod
+    def serialize_image(cls, image):
+        if image:
+            encoded_file_content = base64.b64encode(image).decode("utf-8")
+            return encoded_file_content

@@ -8,20 +8,14 @@ from bytepit_api.models.enums import Role
 def get_users():
     result = admin_queries.get_users()
     if not result:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Could not find any users"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Could not find any users")
     return result
 
 
-def get_unverified_organisers():
-    result = admin_queries.get_unverified_organisers()
+def get_unapproved_organisers():
+    result = admin_queries.get_unapproved_organisers()
     if not result:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No unverified organisers found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No unverified organisers found")
     return result
 
 
