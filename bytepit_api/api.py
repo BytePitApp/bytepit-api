@@ -4,7 +4,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from bytepit_api.routers.admin import router as admin_router
 from bytepit_api.routers.auth import router as auth_router
-from bytepit_api.routers.user import router as user_router
 from bytepit_api.routers.problem import router as problem_router
 from bytepit_api.routers.organiser import router as organiser_router
 from bytepit_api.routers.competition import router as competition_router
@@ -15,16 +14,19 @@ from pydantic import ValidationError
 router = APIRouter(prefix="/api")
 router.include_router(admin_router)
 router.include_router(auth_router)
-router.include_router(user_router)
-router.include_router(problem_router)
-router.include_router(organiser_router)
 router.include_router(competition_router)
+router.include_router(organiser_router)
+router.include_router(problem_router)
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://salmon-stone-0a40c2203.4.azurestaticapps.net", "https://bytepit.cloud"],
+    allow_origins=[
+        "http://localhost:5173",
+        "https://salmon-stone-0a40c2203.4.azurestaticapps.net",
+        "https://bytepit.cloud",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -56,7 +58,6 @@ async def validation_exception_handler(request, exc):
 async def pydantic_validation_exception_handler(request, exc):
     formatted_errors = []
     error_details = exc.errors()
-    print(error_details)
     for error in error_details:
         error_message = error["msg"]
         formatted_message = error_message

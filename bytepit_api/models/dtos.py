@@ -1,8 +1,9 @@
 import base64
 import uuid
-from datetime import datetime, time
+from datetime import datetime
 
-from typing import Annotated, Union, List
+
+from typing import Annotated, List, Union
 
 from fastapi import Form, File, UploadFile
 from pydantic import BaseModel, EmailStr, field_validator, field_serializer, model_validator
@@ -10,6 +11,7 @@ from pydantic_core import PydanticCustomError
 
 from bytepit_api.models.shared import as_form
 from bytepit_api.models.enums import RegisterRole, Role
+
 
 @as_form
 class RegisterDTO(BaseModel):
@@ -19,7 +21,7 @@ class RegisterDTO(BaseModel):
     surname: Annotated[str, Form()]
     email: Annotated[EmailStr, Form()]
     role: Annotated[RegisterRole, Form()]
-    image: Annotated[Union[UploadFile, None], File()] = None
+    image: Annotated[UploadFile, File()] = File(None)
 
     @field_validator("username")
     @classmethod
@@ -34,7 +36,7 @@ class RegisterDTO(BaseModel):
         if len(password) < 8:
             raise PydanticCustomError("length", "Password must be at least 8 characters long")
         return password
-    
+
 
 @as_form
 class LoginDTO(BaseModel):
@@ -76,7 +78,7 @@ class ProblemDTO(BaseModel):
     example_output: Union[str, None] = None
     is_hidden: Union[bool, None] = None
     num_of_points: Union[float, None] = None
-    runtime_limit: Union[time, None] = None
+    runtime_limit: Union[float, None] = None
     description: Union[str, None] = None
     organiser_id: Union[uuid.UUID, None] = None
     is_private: Union[bool, None] = None
@@ -92,14 +94,14 @@ class ProblemDTO(BaseModel):
 
 @as_form
 class CreateProblemDTO(BaseModel):
-    name:  Annotated[str, Form()]
+    name: Annotated[str, Form()]
     example_input: Annotated[str, Form()]
     example_output: Annotated[str, Form()]
     is_hidden: Annotated[bool, Form()]
     num_of_points: Annotated[float, Form()]
-    runtime_limit: Annotated[str, Form()]
+    runtime_limit: Annotated[float, Form()]
     description: Annotated[str, Form()]
-    test_files: Annotated[List[UploadFile], Form()]
+    test_files: Annotated[List[UploadFile], File()] = []
     is_private: Annotated[bool, Form()]
 
     @field_validator("num_of_points")
@@ -108,17 +110,18 @@ class CreateProblemDTO(BaseModel):
         if num_of_points <= 0:
             raise ValueError("num_of_points must be greater than 0")
         return num_of_points
-    
 
+
+@as_form
 class ModifyProblemDTO(BaseModel):
     name: Annotated[Union[str, None], Form()] = None
     example_input: Annotated[Union[str, None], Form()] = None
     example_output: Annotated[Union[str, None], Form()] = None
     is_hidden: Annotated[Union[bool, None], Form()] = None
     num_of_points: Annotated[Union[float, None], Form()] = None
-    runtime_limit: Annotated[Union[str, None], Form()] = None
+    runtime_limit: Annotated[Union[float, None], Form()] = None
     description: Annotated[Union[str, None], Form()] = None
-    test_files: Annotated[List[UploadFile], Form()] = []
+    test_files: Annotated[List[UploadFile], File()] = []
     is_private: Annotated[Union[bool, None], Form()] = None
 
     @field_validator("num_of_points")
@@ -152,8 +155,8 @@ class CompetitionDTO(BaseModel):
     end_time: datetime
     parent_id: Union[uuid.UUID, None] = None
     organiser_id: Union[uuid.UUID, None] = None
-    problems: Union[List[ProblemDTO], List[uuid.UUID]] 
-    trophies: Union[List[TrophyDTO], None, List[uuid.UUID]] = None
+    problems: Union[List[ProblemDTO], None] = []
+    trophies: Union[List[TrophyDTO], None] = []
 
 
 @as_form
@@ -168,11 +171,12 @@ class CreateCompetitionDTO(BaseModel):
     second_place_trophy: Annotated[Union[UploadFile, None], File()] = None
     third_place_trophy: Annotated[Union[UploadFile, None], File()] = None
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def validate_start_time(self):
         if self.start_time >= self.end_time:
             raise ValueError("start_time must be before end_time")
         return self
+
 
 @as_form
 class ModifyCompetitionDTO(BaseModel):
@@ -182,11 +186,11 @@ class ModifyCompetitionDTO(BaseModel):
     end_time: Annotated[Union[str, None], Form()] = None
     parent_id: Annotated[Union[uuid.UUID, None], Form()] = None
     problems: Annotated[List[uuid.UUID], Form()] = []
-    first_place_trophy: Annotated[Union[UploadFile, None], File()] =  None
+    first_place_trophy: Annotated[Union[UploadFile, None], File()] = None
     second_place_trophy: Annotated[Union[UploadFile, None], File()] = None
     third_place_trophy: Annotated[Union[UploadFile, None], File()] = None
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def validate_start_time(self):
         if self.start_time is not None and self.end_time is not None and self.start_time >= self.end_time:
             raise ValueError("start_time must be before end_time")
