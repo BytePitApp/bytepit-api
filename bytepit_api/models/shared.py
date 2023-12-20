@@ -5,6 +5,7 @@ from typing import Annotated, Union
 from fastapi import Form
 from pydantic import BaseModel
 
+
 def as_form(cls):
     new_params = [
         inspect.Parameter(
