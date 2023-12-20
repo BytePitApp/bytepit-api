@@ -7,3 +7,5 @@ python-multipart
 psycopg
 python-jose
 passlib[bcrypt]
+azure-storage-blob
+azure-identity
