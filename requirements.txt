@@ -1,5 +1,4 @@
 fastapi
-fastapi-mail
 pydantic[email]
 uvicorn
 requests
