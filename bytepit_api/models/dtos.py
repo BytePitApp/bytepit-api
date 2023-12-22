@@ -21,7 +21,7 @@ class RegisterDTO(BaseModel):
     surname: Annotated[str, Form()]
     email: Annotated[EmailStr, Form()]
     role: Annotated[RegisterRole, Form()]
-    image: Annotated[UploadFile, File()] = File(None)
+    image: Annotated[Union[UploadFile, None], File()] = None
 
     @field_validator("username")
     @classmethod
