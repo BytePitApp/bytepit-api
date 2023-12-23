@@ -4,9 +4,12 @@ from typing import Annotated, List
 
 from fastapi import APIRouter, Depends
 
-from bytepit_api.dependencies.auth_dependencies import get_current_approved_organiser
+from bytepit_api.dependencies.auth_dependencies import (
+    get_current_approved_organiser,
+    get_current_verified_user,
+)
 from bytepit_api.helpers import blob_storage_helpers
-from bytepit_api.models.dtos import ProblemDTO, CreateProblemDTO, ModifyProblemDTO
+from bytepit_api.models.dtos import CreateSubmissionDTO, ProblemDTO, CreateProblemDTO, ModifyProblemDTO
 from bytepit_api.models.db_models import User
 from bytepit_api.services import problem_service
 
@@ -49,3 +52,11 @@ def delete_problem(problem_id: uuid.UUID, current_user: Annotated[User, Depends(
 @router.get("/{problem_id}/{file_name}")
 def get_file(problem_id: str, file_name: str):
     return blob_storage_helpers.get_blob(f"{problem_id}/{file_name}")
+
+
+@router.post("/create-submission")
+def create_submission(
+    current_user: Annotated[User, Depends(get_current_verified_user)],
+    form_data: Annotated[CreateSubmissionDTO, Depends()],
+):
+    return problem_service.create_submission(current_user.id, form_data)
