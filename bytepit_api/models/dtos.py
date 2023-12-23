@@ -195,3 +195,14 @@ class ModifyCompetitionDTO(BaseModel):
         if self.start_time is not None and self.end_time is not None and self.start_time >= self.end_time:
             raise ValueError("start_time must be before end_time")
         return self
+
+
+class ProblemResultDTO(BaseModel):
+    id: uuid.UUID
+    problem_id: uuid.UUID
+    competition_id: uuid.UUID
+    user_id: uuid.UUID
+    average_runtime: float
+    is_correct: bool
+    num_of_points: float
+    source_code: str
