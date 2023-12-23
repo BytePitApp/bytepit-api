@@ -36,6 +36,14 @@ def get_blob(fullpath: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+def blob_to_text(fullpath: str):
+    try:
+        blob_client = blob_service_client.get_blob_client(container=blob_storage_container, blob=fullpath)
+        return blob_client.download_blob(max_concurrency=1, encoding="UTF-8").readall()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 def download_blob(filename: str):
     try:
         blob_client = blob_service_client.get_blob_client(container=blob_storage_container, blob=filename)
@@ -60,5 +68,23 @@ def delete_all_blobs(problem_id: uuid.UUID):
         for file in files_to_delete:
             delete_blob(file.name)
         return {"message": "Files deleted successfully in blob storage"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+def get_all_tests(problem_id: uuid.UUID):
+    try:
+        all_tests = blob_service_client.get_container_client(container=blob_storage_container).list_blobs(
+            name_starts_with=f"{problem_id}"
+        )
+        tests = {}
+        for test in all_tests:
+            test_file = blob_to_text(test.name)
+            test_idx = test.name.split("/")[1].split("_")[0]
+            if test.name.endswith("in.txt"):
+                tests[test_idx] = {"in": test_file}
+            else:
+                tests[test_idx]["out"] = test_file
+        return tests
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

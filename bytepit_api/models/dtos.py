@@ -206,3 +206,11 @@ class ProblemResultDTO(BaseModel):
     is_correct: bool
     num_of_points: float
     source_code: str
+
+
+@as_form
+class CreateSubmissionDTO(BaseModel):
+    problem_id: uuid.UUID
+    competition_id: Union[uuid.UUID, None] = None
+    source_code: str
+    language: str
