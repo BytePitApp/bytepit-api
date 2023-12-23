@@ -1,5 +1,4 @@
 fastapi
-fastapi-mail
 pydantic[email]
 uvicorn
 requests
@@ -9,3 +8,4 @@ python-jose
 passlib[bcrypt]
 azure-storage-blob
 azure-identity
+azure-communication-email

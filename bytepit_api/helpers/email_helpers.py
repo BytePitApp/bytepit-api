@@ -1,19 +1,8 @@
 import os
+from azure.communication.email import EmailClient
 
-from fastapi_mail import FastMail, MessageSchema, MessageType, ConnectionConfig
 
-connection_config = ConnectionConfig(
-    MAIL_USERNAME="bytepit.progi@gmail.com",
-    MAIL_PASSWORD=os.environ.get("EMAIL_PASSWORD"),
-    MAIL_FROM="bytepit.progi@gmail.com",
-    MAIL_PORT=587,
-    MAIL_SERVER="smtp.gmail.com",
-    MAIL_FROM_NAME="BytePit",
-    MAIL_STARTTLS=True,
-    MAIL_SSL_TLS=False,
-    USE_CREDENTIALS=True,
-    VALIDATE_CERTS=True,
-)
+client = EmailClient.from_connection_string(os.environ.get("COMMUNICATION_SERVICES_CONNECTION_STRING"))
 
 
 async def send_verification_email(email, token):
@@ -60,11 +49,19 @@ async def send_verification_email(email, token):
     </html>
 
     """
-
-    message = MessageSchema(
-        subject="BytePit - Confirm your email", recipients=[email], body=message_html, subtype=MessageType.html
-    )
-
-    fm = FastMail(connection_config)
-    await fm.send_message(message)
+    message = {
+        "senderAddress": "DoNotReply@bytepit.cloud",
+        "recipients": {"to": [{"address": email}]},
+        "content": {
+            "subject": "BytePit - Confirm your email",
+            "html": message_html,
+            "plaintext": "Please confirm your email by clicking on the link: http://bytepit.cloud/confirm-email/{token}",
+        },
+    }
+    try:
+        poller = client.begin_send(message)
+        result = poller.result()
+    except Exception as e:
+        print(e)
+        return False
     return True
