@@ -74,3 +74,14 @@ class Trophy(BaseModel):
         if image:
             encoded_file_content = base64.b64encode(image).decode("utf-8")
             return encoded_file_content
+
+
+class ProblemResult(BaseModel):
+    id: uuid.UUID
+    problem_id: uuid.UUID
+    competition_id: uuid.UUID
+    user_id: uuid.UUID
+    average_runtime: float
+    is_correct: bool
+    num_of_points: float
+    source_code: str
