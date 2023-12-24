@@ -2,7 +2,7 @@ from typing import Union
 import uuid
 
 from bytepit_api.database import db
-from bytepit_api.models.db_models import Problem
+from bytepit_api.models.db_models import Problem, ProblemResult
 from bytepit_api.models.dtos import ProblemDTO, CreateProblemDTO
 
 
@@ -143,3 +143,30 @@ def insert_problem_result(
         )
     result = db.execute_one(query_tuple)
     return result["affected_rows"] == 1
+
+
+def get_submission(problem_id: uuid.UUID, user_id: uuid.UUID, competition_id: Union[uuid.UUID, None] = None):
+    print("uslo u query1")
+    if competition_id:
+        query_tuple = (
+            """
+            SELECT * FROM problem_results
+            WHERE problem_id = %s AND user_id = %s AND competition_id = %s
+            """,
+            (problem_id, user_id, competition_id),
+        )
+    else:
+        query_tuple = (
+            """
+            SELECT * FROM problem_results
+            WHERE problem_id = %s AND user_id = %s AND competition_id IS NULL
+            """,
+            (problem_id, user_id),
+        )
+    print("uslo u query2")
+    result = db.execute_one(query_tuple)
+    print("uslo u query3")
+    if result["result"]:
+        return ProblemResult(**result["result"][0])
+    else:
+        return None

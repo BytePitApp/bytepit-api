@@ -79,7 +79,7 @@ class Trophy(BaseModel):
 class ProblemResult(BaseModel):
     id: uuid.UUID
     problem_id: uuid.UUID
-    competition_id: uuid.UUID
+    competition_id: Union[uuid.UUID, None]
     user_id: uuid.UUID
     average_runtime: float
     is_correct: bool

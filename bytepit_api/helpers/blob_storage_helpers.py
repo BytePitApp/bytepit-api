@@ -85,6 +85,8 @@ def get_all_tests(problem_id: uuid.UUID):
                 tests[test_idx] = {"in": test_file}
             else:
                 tests[test_idx]["out"] = test_file
+                if tests[test_idx]["out"][-1] == "\n":
+                    tests[test_idx]["out"] = tests[test_idx]["out"][:-1]
         return tests
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

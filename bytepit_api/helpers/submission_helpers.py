@@ -1,8 +1,18 @@
 import os
 import requests
 
+from bytepit_api.models.dtos import Language
+
 
 def evaluate_problem_submission(source_code: str, test_input: str, language: str):
+    languages = {
+        Language.python: "main.py",
+        Language.c: "main.c",
+        Language.cpp: "main.cpp",
+        Language.node: "main.js",
+        Language.javascript: "main.js",
+        Language.java: "Main.java",
+    }
     evaluator_api_url = "https://onecompiler-apis.p.rapidapi.com/api/v1/run"
     headers = {
         "content-type": "application/json",
@@ -12,7 +22,7 @@ def evaluate_problem_submission(source_code: str, test_input: str, language: str
     payload = {
         "language": language,
         "stdin": test_input,
-        "files": [{"name": "Main.c", "content": source_code}],
+        "files": [{"name": languages[language], "content": source_code}],
     }
     response = requests.post(evaluator_api_url, headers=headers, json=payload)
     response_json = response.json()
