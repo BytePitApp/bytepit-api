@@ -12,7 +12,7 @@ def evaluate_problem_submission(source_code: str, test_input: str, language: str
     payload = {
         "language": language,
         "stdin": test_input,
-        "files": [{"name": "main.py", "content": source_code}],
+        "files": [{"name": "Main.c", "content": source_code}],
     }
     response = requests.post(evaluator_api_url, headers=headers, json=payload)
     response_json = response.json()

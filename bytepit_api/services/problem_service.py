@@ -58,7 +58,7 @@ def create_submission(current_user_id: uuid.UUID, submission: CreateSubmissionDT
         competition = competition_queries.get_competition(submission.competition_id)
         if not competition:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Could not found competition")
-        if competition.start_time > datetime.now() and competition.end_time < datetime.now():
+        if competition.start_time > datetime.now() or competition.end_time < datetime.now():
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Competition is not running")
         # if not problem_helpers.is_user_in_competition(current_user_id, competition):
         #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User is not in competition")

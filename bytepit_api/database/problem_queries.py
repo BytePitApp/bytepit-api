@@ -104,50 +104,42 @@ def insert_problem_result(
         query_tuple = (
             """
             INSERT INTO problem_results (problem_id, competition_id, user_id, average_runtime, is_correct, num_of_points, source_code, language)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%(problem_id)s, %(competition_id)s, %(user_id)s, %(average_runtime)s, %(is_correct)s, %(num_of_points)s, %(source_code)s, %(language)s)
             ON CONFLICT (problem_id, competition_id, user_id) WHERE competition_id IS NOT NULL DO UPDATE
-            SET average_runtime = %s, is_correct = %s, num_of_points = %s, source_code = %s
-            WHERE problem_results.num_of_points < %s
+            SET average_runtime = %(average_runtime)s, is_correct = %(is_correct)s, num_of_points = %(num_of_points)s, source_code = %(source_code)s
+            WHERE problem_results.num_of_points < %(num_of_points)s OR (problem_results.num_of_points = %(num_of_points)s AND problem_results.average_runtime > %(average_runtime)s)
             """,
             (
-                problem_id,
-                competition_id,
-                user_id,
-                average_runtime,
-                is_correct,
-                num_of_points,
-                source_code,
-                language,
-                average_runtime,
-                is_correct,
-                num_of_points,
-                source_code,
-                num_of_points,
+                {
+                    "problem_id": problem_id,
+                    "competition_id": competition_id,
+                    "user_id": user_id,
+                    "average_runtime": average_runtime,
+                    "is_correct": is_correct,
+                    "num_of_points": num_of_points,
+                    "source_code": source_code,
+                    "language": language,
+                }
             ),
         )
     else:
         query_tuple = (
             """
             INSERT INTO problem_results (problem_id, user_id, average_runtime, is_correct, num_of_points, source_code, language)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            VALUES (%(problem_id)s, %(user_id)s, %(average_runtime)s, %(is_correct)s, %(num_of_points)s, %(source_code)s, %(language)s)
             ON CONFLICT (problem_id, user_id) WHERE competition_id IS NULL DO UPDATE
-            SET average_runtime = %s, is_correct = %s, num_of_points = %s, source_code = %s
-            WHERE problem_results.num_of_points < %s
+            SET average_runtime = %(average_runtime)s, is_correct = %(is_correct)s, num_of_points = %(num_of_points)s, source_code = %(source_code)s
+            WHERE problem_results.num_of_points < %(num_of_points)s OR (problem_results.num_of_points = %(num_of_points)s AND problem_results.average_runtime > %(average_runtime)s)
             """,
-            (
-                problem_id,
-                user_id,
-                average_runtime,
-                is_correct,
-                num_of_points,
-                source_code,
-                language,
-                average_runtime,
-                is_correct,
-                num_of_points,
-                source_code,
-                num_of_points,
-            ),
+            {
+                "problem_id": problem_id,
+                "user_id": user_id,
+                "average_runtime": average_runtime,
+                "is_correct": is_correct,
+                "num_of_points": num_of_points,
+                "source_code": source_code,
+                "language": language,
+            },
         )
     result = db.execute_one(query_tuple)
     return result["affected_rows"] == 1
