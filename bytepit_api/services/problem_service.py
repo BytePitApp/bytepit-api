@@ -67,6 +67,10 @@ def create_submission(current_user_id: uuid.UUID, submission: CreateSubmissionDT
         result = submission_helpers.evaluate_problem_submission(
             submission.source_code, test_dict["in"], submission.language
         )
+
+        if result["exception"]:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result["exception"])
+
         submission_results.append(
             {
                 "execution_time": result["executionTime"],
