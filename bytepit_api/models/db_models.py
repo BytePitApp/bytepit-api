@@ -6,7 +6,7 @@ from typing import List, Union
 
 from pydantic import BaseModel, field_serializer, field_validator
 
-from bytepit_api.models.enums import Role
+from bytepit_api.models.enums import Language, Role
 
 
 class User(BaseModel):
@@ -85,3 +85,4 @@ class ProblemResult(BaseModel):
     is_correct: bool
     num_of_points: float
     source_code: str
+    language: Language

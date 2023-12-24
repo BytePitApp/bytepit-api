@@ -10,7 +10,7 @@ from pydantic import BaseModel, EmailStr, field_validator, field_serializer, mod
 from pydantic_core import PydanticCustomError
 
 from bytepit_api.models.shared import as_form
-from bytepit_api.models.enums import RegisterRole, Role
+from bytepit_api.models.enums import Language, RegisterRole, Role
 
 
 @as_form
@@ -213,4 +213,4 @@ class CreateSubmissionDTO(BaseModel):
     problem_id: uuid.UUID
     competition_id: Union[uuid.UUID, None] = None
     source_code: str
-    language: str
+    language: Language
