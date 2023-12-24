@@ -49,14 +49,29 @@ def delete_problem(problem_id: uuid.UUID, current_user: Annotated[User, Depends(
     return problem_service.delete_problem(problem_id)
 
 
-@router.get("/{problem_id}/{file_name}")
-def get_file(problem_id: str, file_name: str):
-    return blob_storage_helpers.get_blob(f"{problem_id}/{file_name}")
-
-
 @router.post("/create-submission")
 def create_submission(
     current_user: Annotated[User, Depends(get_current_verified_user)],
     form_data: Annotated[CreateSubmissionDTO, Depends()],
 ):
     return problem_service.create_submission(current_user.id, form_data)
+
+
+@router.get("/submission/{problem_id}")
+def get_submission(problem_id: uuid.UUID, current_user: Annotated[User, Depends(get_current_verified_user)]):
+    print("uslo u ruter")
+    return problem_service.get_submission(problem_id, current_user.id)
+
+
+@router.get("/submission/{problem_id}/{competition_id}")
+def get_submission_on_competition(
+    problem_id: uuid.UUID,
+    competition_id: uuid.UUID,
+    current_user: Annotated[User, Depends(get_current_verified_user)],
+):
+    return problem_service.get_submission_on_competition(problem_id, current_user.id, competition_id)
+
+
+@router.get("/{problem_id}/{file_name}")
+def get_file(problem_id: uuid.UUID, file_name: str):
+    return blob_storage_helpers.get_blob(f"{problem_id}/{file_name}")
