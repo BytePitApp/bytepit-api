@@ -32,7 +32,7 @@ jobs:
                   resourceGroup: BytePit
                   imageToBuild: bytepit.azurecr.io/bytepit-dev:${{ github.sha }}
               env:
-                  DB_CONNECTION_STRING: "host=database dbname=db user=postgres password=postgres"
+                  DB_CONNECTION_STRING: "host=bytepit-pgsql01.postgres.database.azure.com dbname=bytepit-dev user=postgres password=Pgsql123"
                   SECRET_KEY: "5ce3b19d23543100e7be58f39c430a8dfb1b4584fec88283583515b05481cdf4"
                   RAPID_API_KEY: "672635c1ccmsh0127f8b5a277f05p1b59ffjsnb02aef9f2c98"
                   BLOB_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;AccountName=bytepitstorageaccount;AccountKey=STW6NC26wOXcmVpFgDYeKaC2d9O6NWaYeiTP5lG1HRFNpcZILym8FQtXL6tWgp43N4VwEzNytW0i+AStdcuiuA==;EndpointSuffix=core.windows.net"
