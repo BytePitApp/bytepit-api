@@ -26,6 +26,7 @@ app.add_middleware(
         "http://localhost:5173",
         "https://salmon-stone-0a40c2203.4.azurestaticapps.net",
         "https://bytepit.cloud",
+        "https://dev.bytepit.cloud",
     ],
     allow_credentials=True,
     allow_methods=["*"],
