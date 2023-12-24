@@ -38,3 +38,4 @@ jobs:
                   BLOB_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;AccountName=bytepitstorageaccount;AccountKey=STW6NC26wOXcmVpFgDYeKaC2d9O6NWaYeiTP5lG1HRFNpcZILym8FQtXL6tWgp43N4VwEzNytW0i+AStdcuiuA==;EndpointSuffix=core.windows.net"
                   BLOB_STORAGE_CONTAINER_NAME: "tests-dir"
                   COMMUNICATION_SERVICES_CONNECTION_STRING: "endpoint=https://bypit-email.europe.communication.azure.com/;accesskey=B+X+DVh9MAZ0a5AXtMWlGjTobTGRc1FAY/9tiySC9x+ZjRBGK8O1NEULwLkVGU25IPT84RFRRO1lYIR2bkDo3A=="
+                  UI_URL: "https://dev.bytepit.cloud"
