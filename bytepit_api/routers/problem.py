@@ -59,7 +59,6 @@ def create_submission(
 
 @router.get("/submission/{problem_id}")
 def get_submission(problem_id: uuid.UUID, current_user: Annotated[User, Depends(get_current_verified_user)]):
-    print("uslo u ruter")
     return problem_service.get_submission(problem_id, current_user.id)
 
 
