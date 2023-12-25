@@ -10,7 +10,7 @@ from pydantic import BaseModel, EmailStr, field_validator, field_serializer, mod
 from pydantic_core import PydanticCustomError
 
 from bytepit_api.models.shared import as_form
-from bytepit_api.models.enums import RegisterRole, Role
+from bytepit_api.models.enums import Language, RegisterRole, Role
 
 
 @as_form
@@ -196,3 +196,22 @@ class ModifyCompetitionDTO(BaseModel):
         if self.start_time is not None and self.end_time is not None and self.start_time >= self.end_time:
             raise ValueError("start_time must be before end_time")
         return self
+
+
+class ProblemResultDTO(BaseModel):
+    id: uuid.UUID
+    problem_id: uuid.UUID
+    competition_id: uuid.UUID
+    user_id: uuid.UUID
+    average_runtime: float
+    is_correct: bool
+    num_of_points: float
+    source_code: str
+
+
+@as_form
+class CreateSubmissionDTO(BaseModel):
+    problem_id: uuid.UUID
+    competition_id: Union[uuid.UUID, None] = None
+    source_code: str
+    language: Language
