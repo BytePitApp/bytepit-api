@@ -41,7 +41,7 @@ async def send_verification_email(email, token):
                     <td>
                         <h1>BytePit</h1>
                         <h3>Please confirm your email by clicking on the button:</h3>
-                        <a href="http://bytepit.cloud/confirm-email/{token}" class="button-link">CONFIRM</a>
+                        <a href="{os.environ.get("UI_URL", "https://bytepit.cloud")}/confirm-email/{token}" class="button-link">CONFIRM</a>
                     </td>
                 </tr>
             </table>
@@ -55,7 +55,7 @@ async def send_verification_email(email, token):
         "content": {
             "subject": "BytePit - Confirm your email",
             "html": message_html,
-            "plaintext": "Please confirm your email by clicking on the link: http://bytepit.cloud/confirm-email/{token}",
+            "plaintext": f"Please confirm your email by clicking on the link: {os.environ.get('UI_URL', 'https://bytepit.cloud')}/confirm-email/{token}",
         },
     }
     try:
