@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Response
 from bytepit_api.services import auth_service
 from bytepit_api.dependencies.auth_dependencies import get_current_verified_user
 from bytepit_api.models.db_models import User
-from bytepit_api.models.dtos import LoginDTO, RegisterDTO, TokenDTO, UserDTO
+from bytepit_api.models.dtos import LoginDTO, RegisterDTO, TokenDTO, CurrentUserDTO
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -31,6 +31,6 @@ def logout(response: Response):
     return auth_service.logout(response)
 
 
-@router.get("/current", response_model=UserDTO)
+@router.get("/current", response_model=CurrentUserDTO)
 def get_current_user(current_user: Annotated[User, Depends(get_current_verified_user)]):
     return current_user

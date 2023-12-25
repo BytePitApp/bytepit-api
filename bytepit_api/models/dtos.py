@@ -66,6 +66,10 @@ class UserDTO(BaseModel):
             return encoded_file_content
 
 
+class CurrentUserDTO(UserDTO):
+    id: uuid.UUID
+
+
 class TokenDTO(BaseModel):
     access_token: str
     token_type: str
