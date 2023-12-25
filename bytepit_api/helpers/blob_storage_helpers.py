@@ -10,6 +10,12 @@ from fastapi.responses import StreamingResponse
 from bytepit_api.database import blob_storage_container, blob_service_client
 
 
+def remove_newline(string: str):
+    if string[-1] == "\n":
+        return string[:-1]
+    return string
+
+
 def response_stream(data: Iterable[bytes], status: int = 200, download: bool = False) -> StreamingResponse:
     if download:
         return StreamingResponse(content=data, status_code=status, media_type="application/octet-stream")
@@ -85,8 +91,7 @@ def get_all_tests(problem_id: uuid.UUID):
                 tests[test_idx] = {"in": test_file}
             else:
                 tests[test_idx]["out"] = test_file
-                if tests[test_idx]["out"][-1] == "\n":
-                    tests[test_idx]["out"] = tests[test_idx]["out"][:-1]
+                tests[test_idx]["out"] = remove_newline(tests[test_idx]["out"])
         return tests
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

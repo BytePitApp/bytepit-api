@@ -71,8 +71,7 @@ def create_submission(current_user_id: uuid.UUID, submission: CreateSubmissionDT
         if result["exception"]:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result["exception"])
 
-        if result["stdout"][-1] == "\n":
-            result["stdout"] = result["stdout"][:-1]
+        result["stdout"] = blob_storage_helpers.remove_newline(result["stdout"])
 
         submission_results.append(
             {
@@ -105,8 +104,7 @@ def create_submission(current_user_id: uuid.UUID, submission: CreateSubmissionDT
 
 
 def get_submission(problem_id: uuid.UUID, user_id: uuid.UUID):
-    print("uslo u servis")
-    return problem_queries.get_submission(problem_id, user_id)
+    return problem_queries.get_problem_result(problem_id, user_id)
 
 
 def get_submission_on_competition(
@@ -114,4 +112,4 @@ def get_submission_on_competition(
     user_id: uuid.UUID,
     competition_id: uuid.UUID,
 ):
-    return problem_queries.get_submission(problem_id, user_id, competition_id)
+    return problem_queries.get_problem_result(problem_id, user_id, competition_id)
