@@ -6,7 +6,7 @@ from typing import List, Union
 
 from pydantic import BaseModel, field_serializer, field_validator
 
-from bytepit_api.models.enums import Role
+from bytepit_api.models.enums import Language, Role
 
 
 class User(BaseModel):
@@ -79,9 +79,10 @@ class Trophy(BaseModel):
 class ProblemResult(BaseModel):
     id: uuid.UUID
     problem_id: uuid.UUID
-    competition_id: uuid.UUID
+    competition_id: Union[uuid.UUID, None]
     user_id: uuid.UUID
     average_runtime: float
     is_correct: bool
     num_of_points: float
     source_code: str
+    language: Language

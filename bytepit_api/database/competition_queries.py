@@ -2,12 +2,12 @@ from datetime import datetime
 import uuid
 from typing import List, Union
 from bytepit_api.database import db
-from bytepit_api.models.db_models import Competition, Problem, Trophy
-from bytepit_api.models.dtos import ProblemDTO, CompetitionDTO, TrophyDTO
+from bytepit_api.models.db_models import Competition, Trophy
+from bytepit_api.models.dtos import ProblemDTO
 
 
 def get_competitions():
-    query_tuple = ("""SELECT * FROM competition""", ())
+    query_tuple = ("""SELECT * FROM competitions""", ())
     result = db.execute_one(query_tuple)
     if result["result"]:
         return [Competition(**competition) for competition in result["result"]]
@@ -36,7 +36,7 @@ def insert_competition(
     problems_array = "{" + ",".join(map(str, problems)) + "}" if problems else None
     competition_insert_query = (
         """
-        INSERT INTO competition (name, description, start_time, end_time, parent_id, organiser_id, problems)
+        INSERT INTO competitions (name, description, start_time, end_time, parent_id, organiser_id, problems)
         VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id
         """,
         (name, description, start_time, end_time, parent_id, organiser_id, problems_array),
@@ -74,7 +74,7 @@ def get_problems(problem_ids: List[uuid.UUID]):
 
 def get_active_competitions():
     query_tuple = (
-        """SELECT * FROM competition WHERE start_time < NOW() AND end_time > NOW() ORDER BY start_time ASC""",
+        """SELECT * FROM competitions WHERE start_time < NOW() AND end_time > NOW() ORDER BY start_time ASC""",
         (),
     )
     result = db.execute_one(query_tuple)
@@ -86,7 +86,7 @@ def get_active_competitions():
 
 def get_random_competition():
     query_tuple = (
-        """SELECT * FROM competition ORDER BY RANDOM() LIMIT 1""",
+        """SELECT * FROM competitions ORDER BY RANDOM() LIMIT 1""",
         (),
     )
     result = db.execute_one(query_tuple)
@@ -98,7 +98,7 @@ def get_random_competition():
 
 def get_competition(competition_id: uuid.UUID):
     query_tuple = (
-        """SELECT * FROM competition WHERE id = %s""",
+        """SELECT * FROM competitions WHERE id = %s""",
         (competition_id,),
     )
     result = db.execute_one(query_tuple)
@@ -124,7 +124,7 @@ def set_user_trophy(competition_id: uuid.UUID, user_id: uuid.UUID, position: int
 def modify_competition(competition_id: uuid.UUID, competition: Competition):
     query_tuple = (
         """
-        UPDATE competition
+        UPDATE competitions
         SET name = %s, description = %s, start_time = %s, end_time = %s, parent_id = %s, organiser_id = %s, problems = %s
         WHERE id = %s
         """,
@@ -144,7 +144,7 @@ def modify_competition(competition_id: uuid.UUID, competition: Competition):
 
 
 def delete_competition(competition_id: uuid.UUID):
-    query_tuple = ("DELETE FROM competition WHERE id = %s", (competition_id,))
+    query_tuple = ("DELETE FROM competitions WHERE id = %s", (competition_id,))
     result = db.execute_one(query_tuple)
     return result["affected_rows"] == 1
 

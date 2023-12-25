@@ -1,13 +1,14 @@
+from typing import Union
 import uuid
 
 from bytepit_api.database import db
-from bytepit_api.models.db_models import Problem
+from bytepit_api.models.db_models import Problem, ProblemResult, Language
 from bytepit_api.models.dtos import ProblemDTO, CreateProblemDTO
 
 
 def get_problems_by_competition(competition_id: uuid.UUID):
     query_tuple = (
-        """SELECT * FROM problems WHERE id IN (SELECT unnest(problems) FROM competition WHERE id = %s);""",
+        """SELECT * FROM problems WHERE id IN (SELECT unnest(problems) FROM competitions WHERE id = %s);""",
         (competition_id,),
     )
     result = db.execute_one(query_tuple)
@@ -87,3 +88,82 @@ def modify_problem(problem_id: uuid.UUID, problem: ProblemDTO):
     )
     result = db.execute_one(query_tuple)
     return result["affected_rows"] == 1
+
+
+def insert_problem_result(
+    problem_id: uuid.UUID,
+    competition_id: Union[uuid.UUID, None],
+    user_id: uuid.UUID,
+    average_runtime: float,
+    is_correct: bool,
+    num_of_points: float,
+    source_code: str,
+    language: Language,
+):
+    if competition_id:
+        query_tuple = (
+            """
+            INSERT INTO problem_results (problem_id, competition_id, user_id, average_runtime, is_correct, num_of_points, source_code, language)
+            VALUES (%(problem_id)s, %(competition_id)s, %(user_id)s, %(average_runtime)s, %(is_correct)s, %(num_of_points)s, %(source_code)s, %(language)s)
+            ON CONFLICT (problem_id, competition_id, user_id) WHERE competition_id IS NOT NULL DO UPDATE
+            SET average_runtime = %(average_runtime)s, is_correct = %(is_correct)s, num_of_points = %(num_of_points)s, source_code = %(source_code)s
+            WHERE problem_results.num_of_points < %(num_of_points)s OR (problem_results.num_of_points = %(num_of_points)s AND problem_results.average_runtime > %(average_runtime)s)
+            """,
+            (
+                {
+                    "problem_id": problem_id,
+                    "competition_id": competition_id,
+                    "user_id": user_id,
+                    "average_runtime": average_runtime,
+                    "is_correct": is_correct,
+                    "num_of_points": num_of_points,
+                    "source_code": source_code,
+                    "language": language,
+                }
+            ),
+        )
+    else:
+        query_tuple = (
+            """
+            INSERT INTO problem_results (problem_id, user_id, average_runtime, is_correct, num_of_points, source_code, language)
+            VALUES (%(problem_id)s, %(user_id)s, %(average_runtime)s, %(is_correct)s, %(num_of_points)s, %(source_code)s, %(language)s)
+            ON CONFLICT (problem_id, user_id) WHERE competition_id IS NULL DO UPDATE
+            SET average_runtime = %(average_runtime)s, is_correct = %(is_correct)s, num_of_points = %(num_of_points)s, source_code = %(source_code)s
+            WHERE problem_results.num_of_points < %(num_of_points)s OR (problem_results.num_of_points = %(num_of_points)s AND problem_results.average_runtime > %(average_runtime)s)
+            """,
+            {
+                "problem_id": problem_id,
+                "user_id": user_id,
+                "average_runtime": average_runtime,
+                "is_correct": is_correct,
+                "num_of_points": num_of_points,
+                "source_code": source_code,
+                "language": language,
+            },
+        )
+    result = db.execute_one(query_tuple)
+    return result["affected_rows"] == 1
+
+
+def get_problem_result(problem_id: uuid.UUID, user_id: uuid.UUID, competition_id: Union[uuid.UUID, None] = None):
+    if competition_id:
+        query_tuple = (
+            """
+            SELECT * FROM problem_results
+            WHERE problem_id = %s AND user_id = %s AND competition_id = %s
+            """,
+            (problem_id, user_id, competition_id),
+        )
+    else:
+        query_tuple = (
+            """
+            SELECT * FROM problem_results
+            WHERE problem_id = %s AND user_id = %s AND competition_id IS NULL
+            """,
+            (problem_id, user_id),
+        )
+    result = db.execute_one(query_tuple)
+    if result["result"]:
+        return ProblemResult(**result["result"][0])
+    else:
+        return None
