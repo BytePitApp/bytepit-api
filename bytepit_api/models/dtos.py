@@ -49,6 +49,7 @@ class LoginDTO(BaseModel):
 
 
 class UserDTO(BaseModel):
+    id: uuid.UUID
     username: str
     email: str
     role: Role
@@ -64,10 +65,6 @@ class UserDTO(BaseModel):
         if image:
             encoded_file_content = base64.b64encode(image).decode("utf-8")
             return encoded_file_content
-
-
-class CurrentUserDTO(UserDTO):
-    id: uuid.UUID
 
 
 class TokenDTO(BaseModel):
