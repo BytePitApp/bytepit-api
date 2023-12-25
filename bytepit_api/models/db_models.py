@@ -66,14 +66,7 @@ class Trophy(BaseModel):
     competition_id: uuid.UUID
     position: int
     user_id: Union[uuid.UUID, None] = None
-    icon: str
-
-    @field_serializer("icon")
-    @classmethod
-    def serialize_image(cls, image):
-        if image:
-            encoded_file_content = base64.b64encode(image).decode("utf-8")
-            return encoded_file_content
+    icon: Union[bytes, None] = None
 
 
 class ProblemResult(BaseModel):

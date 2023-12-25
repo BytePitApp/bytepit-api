@@ -49,6 +49,7 @@ class LoginDTO(BaseModel):
 
 
 class UserDTO(BaseModel):
+    id: uuid.UUID
     username: str
     email: str
     role: Role
