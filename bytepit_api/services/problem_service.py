@@ -71,7 +71,7 @@ def create_submission(current_user_id: uuid.UUID, submission: CreateSubmissionDT
         if result["exception"]:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result["exception"])
 
-        result["stdout"] = blob_storage_helpers.remove_newline(result["stdout"])
+        result["stdout"] = blob_storage_helpers.remove_trailing_newline(result["stdout"])
 
         submission_results.append(
             {
