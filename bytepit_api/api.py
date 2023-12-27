@@ -40,6 +40,7 @@ app.include_router(router)
 async def validation_exception_handler(request, exc):
     formatted_errors = []
     error_details = exc.errors()
+    print(error_details)
     for error in error_details:
         error_message = error["msg"]
         if "value is not a valid email address: " in error_message:
@@ -59,6 +60,7 @@ async def validation_exception_handler(request, exc):
 async def pydantic_validation_exception_handler(request, exc):
     formatted_errors = []
     error_details = exc.errors()
+    print(error_details)
     for error in error_details:
         error_message = error["msg"]
         formatted_message = error_message
