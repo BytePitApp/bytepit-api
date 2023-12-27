@@ -215,3 +215,8 @@ class CreateSubmissionDTO(BaseModel):
     competition_id: Union[uuid.UUID, None] = None
     source_code: str
     language: Language
+
+
+class UserStatisticsDTO(BaseModel):
+    total_submissions: int
+    correct_submissions: int

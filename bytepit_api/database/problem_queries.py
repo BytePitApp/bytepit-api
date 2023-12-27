@@ -167,3 +167,34 @@ def get_problem_result(problem_id: uuid.UUID, user_id: uuid.UUID, competition_id
         return ProblemResult(**result["result"][0])
     else:
         return None
+
+
+def get_user_statistics(user_id: uuid.UUID):
+    query_tuple = (
+        """
+        SELECT COUNT(*) AS total_submissions, SUM(CAST(is_correct AS INT)) AS correct_submissions
+        FROM problem_results
+        WHERE user_id = %s
+        """,
+        (user_id,),
+    )
+    result = db.execute_one(query_tuple)
+    if result["result"]:
+        return result["result"][0]
+    else:
+        return None
+
+
+def get_problems_by_organiser(organiser_id: uuid.UUID):
+    query_tuple = (
+        """
+        SELECT * FROM problems
+        WHERE organiser_id = %s
+        """,
+        (organiser_id,),
+    )
+    result = db.execute_one(query_tuple)
+    if result["result"]:
+        return [Problem(**problem) for problem in result["result"]]
+    else:
+        return None

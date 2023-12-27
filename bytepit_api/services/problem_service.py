@@ -15,6 +15,14 @@ def get_all_problems():
     return result
 
 
+def get_user_statistics(user_id: uuid.UUID):
+    return problem_queries.get_user_statistics(user_id)
+
+
+def get_problems_by_organiser(organiser_id: uuid.UUID):
+    return problem_queries.get_problems_by_organiser(organiser_id)
+
+
 def get_problem(problem_id: uuid.UUID):
     return problem_helpers.get_problem(problem_id)
 

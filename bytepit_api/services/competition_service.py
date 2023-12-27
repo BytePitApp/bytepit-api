@@ -169,3 +169,19 @@ def delete_competition(competition_id: uuid.UUID):
             detail=f"No competition with id {competition_id} found",
         )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+def get_competitions_by_organiser(organiser_id: uuid.UUID):
+    competitions = competition_queries.get_competitions_by_organiser(organiser_id)
+    competitions_dtos = []
+    for competition in competitions:
+        problems = problem_queries.get_problems_by_competition(competition.id)
+        trophies = competition_queries.get_trophies_by_competition(competition.id)
+
+        competition_dict = competition.model_dump(exclude={"problems"})
+        competition_dto = CompetitionDTO(**competition_dict)
+        competition_dto.problems = [ProblemDTO(**problem.model_dump()) for problem in problems]
+        competition_dto.trophies = [TrophyDTO(**trophy.model_dump()) for trophy in trophies]
+        competitions_dtos.append(competition_dto)
+
+    return competitions_dtos

@@ -153,3 +153,15 @@ def delete_trophy_by_competition_id(competition_id: uuid.UUID):
     query_tuple = ("DELETE FROM trophies WHERE competition_id = %s", (competition_id,))
     result = db.execute_one(query_tuple)
     return result["affected_rows"] > 0
+
+
+def get_competitions_by_organiser(organiser_id: uuid.UUID):
+    query_tuple = (
+        """SELECT * FROM competitions WHERE organiser_id = %s ORDER BY start_time DESC""",
+        (organiser_id,),
+    )
+    result = db.execute_one(query_tuple)
+    if result["result"]:
+        return [Competition(**competition) for competition in result["result"]]
+    else:
+        return []
