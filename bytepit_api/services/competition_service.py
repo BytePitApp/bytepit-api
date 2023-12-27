@@ -1,3 +1,4 @@
+import base64
 import uuid
 from fastapi import status, HTTPException, Response
 
@@ -169,3 +170,14 @@ def delete_competition(competition_id: uuid.UUID):
             detail=f"No competition with id {competition_id} found",
         )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+def get_competition_results(competition_id: uuid.UUID):
+    competition = competition_queries.get_competition(competition_id)
+    if not competition:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No competition with id {competition_id} found",
+        )
+    results = competition_queries.get_competition_results(competition_id)
+    return results

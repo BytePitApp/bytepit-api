@@ -168,9 +168,9 @@ class CreateCompetitionDTO(BaseModel):
     end_time: Annotated[str, Form()]
     parent_id: Annotated[Union[uuid.UUID, None], Form()] = None
     problems: Annotated[List[uuid.UUID], Form()]
-    first_place_trophy: Annotated[Union[UploadFile, None], File()] = None
-    second_place_trophy: Annotated[Union[UploadFile, None], File()] = None
-    third_place_trophy: Annotated[Union[UploadFile, None], File()] = None
+    first_place_trophy: Annotated[UploadFile, File()]
+    second_place_trophy: Annotated[UploadFile, File()]
+    third_place_trophy: Annotated[UploadFile, File()]
 
     @model_validator(mode="after")
     def validate_start_time(self):
@@ -215,3 +215,16 @@ class CreateSubmissionDTO(BaseModel):
     competition_id: Union[uuid.UUID, None] = None
     source_code: str
     language: Language
+
+
+class TrophiesByUserDTO(BaseModel):
+    competition_id: uuid.UUID
+    rank_in_competition: int
+    icon: Union[bytes, None] = None
+
+    @field_serializer("icon")
+    @classmethod
+    def serialize_icon(cls, icon):
+        if icon:
+            encoded_file_content = base64.b64encode(icon).decode("utf-8")
+            return encoded_file_content
