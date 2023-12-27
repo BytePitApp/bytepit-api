@@ -9,7 +9,13 @@ from bytepit_api.dependencies.auth_dependencies import (
     get_current_verified_user,
 )
 from bytepit_api.helpers import blob_storage_helpers
-from bytepit_api.models.dtos import CreateSubmissionDTO, ProblemDTO, CreateProblemDTO, ModifyProblemDTO
+from bytepit_api.models.dtos import (
+    CreateSubmissionDTO,
+    ProblemDTO,
+    CreateProblemDTO,
+    ModifyProblemDTO,
+    UserStatisticsDTO,
+)
 from bytepit_api.models.db_models import User
 from bytepit_api.services import problem_service
 
@@ -20,6 +26,18 @@ router = APIRouter(prefix="/problems", tags=["problems"])
 @router.get("", response_model=List[ProblemDTO])
 def list_problems():
     return problem_service.get_all_problems()
+
+
+@router.get("/user-statistics/{user_id}", response_model=UserStatisticsDTO)
+def get_user_statistics(user_id: uuid.UUID, current_user: Annotated[User, Depends(get_current_verified_user)]):
+    return problem_service.get_user_statistics(user_id)
+
+
+@router.get("/problems-by-organiser/{organiser_id}", response_model=List[ProblemDTO])
+def get_problems_by_organiser(
+    organiser_id: uuid.UUID, current_user: Annotated[User, Depends(get_current_verified_user)]
+):
+    return problem_service.get_problems_by_organiser(organiser_id)
 
 
 @router.get("/{problem_id}", response_model=ProblemDTO)
