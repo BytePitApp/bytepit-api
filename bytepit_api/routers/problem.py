@@ -9,7 +9,13 @@ from bytepit_api.dependencies.auth_dependencies import (
     get_current_verified_user,
 )
 from bytepit_api.helpers import blob_storage_helpers
-from bytepit_api.models.dtos import CreateSubmissionDTO, ProblemDTO, CreateProblemDTO, ModifyProblemDTO
+from bytepit_api.models.dtos import (
+    CreateSubmissionDTO,
+    ProblemDTO,
+    CreateProblemDTO,
+    ModifyProblemDTO,
+    ProblemResultStatusDTO,
+)
 from bytepit_api.models.db_models import User
 from bytepit_api.services import problem_service
 
@@ -49,7 +55,7 @@ def delete_problem(problem_id: uuid.UUID, current_user: Annotated[User, Depends(
     return problem_service.delete_problem(problem_id)
 
 
-@router.post("/create-submission")
+@router.post("/create-submission", response_model=ProblemResultStatusDTO)
 def create_submission(
     current_user: Annotated[User, Depends(get_current_verified_user)],
     form_data: Annotated[CreateSubmissionDTO, Depends()],

@@ -207,6 +207,7 @@ class ProblemResultDTO(BaseModel):
     is_correct: bool
     num_of_points: float
     source_code: str
+    language: Language
 
 
 @as_form
@@ -217,14 +218,14 @@ class CreateSubmissionDTO(BaseModel):
     language: Language
 
 
-class TrophiesByUserDTO(BaseModel):
-    competition_id: uuid.UUID
-    rank_in_competition: int
-    icon: Union[bytes, None] = None
+class CompetitionResultDTO(BaseModel):
+    user_id: uuid.UUID
+    total_points: float
+    problem_results: List[ProblemResultDTO]
 
-    @field_serializer("icon")
-    @classmethod
-    def serialize_icon(cls, icon):
-        if icon:
-            encoded_file_content = base64.b64encode(icon).decode("utf-8")
-            return encoded_file_content
+
+class ProblemResultStatusDTO(BaseModel):
+    is_correct: bool
+    is_runtime_ok: bool
+    exception: Union[str, None] = None
+    has_improved: bool
