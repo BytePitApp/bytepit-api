@@ -217,6 +217,20 @@ class CreateSubmissionDTO(BaseModel):
     language: Language
 
 
+class TrophiesByUserDTO(BaseModel):
+    competition_id: uuid.UUID
+    rank_in_competition: int
+    icon: Union[bytes, None] = None
+
+    @field_serializer("icon")
+    @classmethod
+    def serialize_icon(cls, icon):
+        if icon:
+            encoded_file_content = base64.b64encode(icon).decode("utf-8")
+            return encoded_file_content
+
+
 class UserStatisticsDTO(BaseModel):
     total_submissions: int
     correct_submissions: int
+    trophies: List[TrophiesByUserDTO]
