@@ -64,3 +64,10 @@ async def delete_competition(
     competition_id: uuid.UUID, current_user: Annotated[User, Depends(get_current_approved_organiser)]
 ):
     return competition_service.delete_competition(competition_id)
+
+
+@router.get("/competitions-by-organiser/{organiser_id}", response_model=List[CompetitionDTO])
+async def get_competitions_by_organiser(
+    organiser_id: uuid.UUID, current_user: Annotated[User, Depends(get_current_verified_user)]
+):
+    return competition_service.get_competitions_by_organiser(organiser_id)
