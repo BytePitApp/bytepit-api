@@ -5,7 +5,7 @@ from fastapi import HTTPException, status, Response
 
 from bytepit_api.database import problem_queries, competition_queries
 from bytepit_api.helpers import blob_storage_helpers, problem_helpers, submission_helpers
-from bytepit_api.models.dtos import CreateSubmissionDTO, CreateProblemDTO, ModifyProblemDTO
+from bytepit_api.models.dtos import CreateSubmissionDTO, CreateProblemDTO, ModifyProblemDTO, TrophiesByUserDTO
 
 
 def get_all_problems():
@@ -13,6 +13,21 @@ def get_all_problems():
     if not result:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Could not found any problems")
     return result
+
+
+def get_user_statistics(user_id: uuid.UUID):
+    trophies = competition_queries.get_trophies_by_user(user_id)
+    trophies_dto = [TrophiesByUserDTO(**trophy) for trophy in trophies]
+    user_statistics_without_trophies = problem_queries.get_user_statistics(user_id)
+    user_statistics = {
+        **user_statistics_without_trophies,
+        "trophies": trophies_dto,
+    }
+    return user_statistics
+
+
+def get_problems_by_organiser(organiser_id: uuid.UUID):
+    return problem_queries.get_problems_by_organiser(organiser_id)
 
 
 def get_problem(problem_id: uuid.UUID):
