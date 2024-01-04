@@ -75,8 +75,8 @@ def create_submission(current_user_id: uuid.UUID, submission: CreateSubmissionDT
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Could not found competition")
         if competition.start_time > datetime.now() or competition.end_time < datetime.now():
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Competition is not running")
-        # if not problem_helpers.is_user_in_competition(current_user_id, competition):
-        #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User is not in competition")
+        if problem.id not in competition.problems:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Problem is not in competition")
     submission_results = []
     for test_idx, test_dict in blob_storage_helpers.get_all_tests(submission.problem_id).items():
         result = submission_helpers.evaluate_problem_submission(
@@ -100,13 +100,14 @@ def create_submission(current_user_id: uuid.UUID, submission: CreateSubmissionDT
             submission_result
             for submission_result in submission_results
             if submission_result["output"] == submission_result["expected_output"]
+            and submission_result["execution_time"] < problem.runtime_limit
         ]
     )
     total_points = (correct_submissions / len(submission_results)) * problem.num_of_points
     total_runtime = sum([submission_result["execution_time"] for submission_result in submission_results])
     average_runtime = total_runtime / len(submission_results)
     is_correct = total_points == problem.num_of_points
-    return problem_queries.insert_problem_result(
+    status = problem_queries.insert_problem_result(
         submission.problem_id,
         submission.competition_id,
         current_user_id,
@@ -116,6 +117,12 @@ def create_submission(current_user_id: uuid.UUID, submission: CreateSubmissionDT
         submission.source_code,
         submission.language,
     )
+    return {
+        "is_correct": is_correct,
+        "is_runtime_ok": average_runtime < problem.runtime_limit,
+        "has_improved": status,
+        "exception": result["exception"] if result["exception"] else None,
+    }
 
 
 def get_submission(problem_id: uuid.UUID, user_id: uuid.UUID):

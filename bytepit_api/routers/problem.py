@@ -14,6 +14,7 @@ from bytepit_api.models.dtos import (
     ProblemDTO,
     CreateProblemDTO,
     ModifyProblemDTO,
+    ProblemResultStatusDTO,
     UserStatisticsDTO,
 )
 from bytepit_api.models.db_models import User
@@ -67,7 +68,7 @@ def delete_problem(problem_id: uuid.UUID, current_user: Annotated[User, Depends(
     return problem_service.delete_problem(problem_id)
 
 
-@router.post("/create-submission")
+@router.post("/create-submission", response_model=ProblemResultStatusDTO)
 def create_submission(
     current_user: Annotated[User, Depends(get_current_verified_user)],
     form_data: Annotated[CreateSubmissionDTO, Depends()],

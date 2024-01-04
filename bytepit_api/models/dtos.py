@@ -168,9 +168,9 @@ class CreateCompetitionDTO(BaseModel):
     end_time: Annotated[str, Form()]
     parent_id: Annotated[Union[uuid.UUID, None], Form()] = None
     problems: Annotated[List[uuid.UUID], Form()]
-    first_place_trophy: Annotated[Union[UploadFile, None], File()] = None
-    second_place_trophy: Annotated[Union[UploadFile, None], File()] = None
-    third_place_trophy: Annotated[Union[UploadFile, None], File()] = None
+    first_place_trophy: Annotated[UploadFile, File()]
+    second_place_trophy: Annotated[UploadFile, File()]
+    third_place_trophy: Annotated[UploadFile, File()]
 
     @model_validator(mode="after")
     def validate_start_time(self):
@@ -207,6 +207,7 @@ class ProblemResultDTO(BaseModel):
     is_correct: bool
     num_of_points: float
     source_code: str
+    language: Language
 
 
 @as_form
@@ -215,6 +216,19 @@ class CreateSubmissionDTO(BaseModel):
     competition_id: Union[uuid.UUID, None] = None
     source_code: str
     language: Language
+
+
+class CompetitionResultDTO(BaseModel):
+    user_id: uuid.UUID
+    total_points: float
+    problem_results: List[ProblemResultDTO]
+
+
+class ProblemResultStatusDTO(BaseModel):
+    is_correct: bool
+    is_runtime_ok: bool
+    exception: Union[str, None] = None
+    has_improved: bool
 
 
 class TrophiesByUserDTO(BaseModel):

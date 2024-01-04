@@ -155,6 +155,46 @@ def delete_trophy_by_competition_id(competition_id: uuid.UUID):
     return result["affected_rows"] > 0
 
 
+def get_competition_results(competition_id: uuid.UUID):
+    query_tuple = (
+        """
+        SELECT
+            problems.name,
+            problem_results.*
+        FROM problem_results
+        JOIN problems
+        ON problems.id = problem_results.problem_id
+        WHERE  competition_id = %s;  
+        """,
+        (competition_id,),
+    )
+    result = db.execute_one(query_tuple)
+    if result["result"]:
+        problems_by_user = {}
+        for problem in result["result"]:
+            if problem["user_id"] not in problems_by_user:
+                problems_by_user[problem["user_id"]] = {
+                    "user_id": problem["user_id"],
+                    "total_points": 0,
+                    "problem_results": [],
+                }
+            problems_by_user[problem["user_id"]]["problem_results"].append(
+                {
+                    "id": problem["id"],
+                    "problem_id": problem["problem_id"],
+                    "user_id": problem["user_id"],
+                    "competition_id": problem["competition_id"],
+                    "num_of_points": problem["num_of_points"],
+                    "source_code": problem["source_code"],
+                    "language": problem["language"],
+                    "average_runtime": problem["average_runtime"],
+                    "is_correct": problem["is_correct"],
+                }
+            )
+            problems_by_user[problem["user_id"]]["total_points"] += problem["num_of_points"]
+        return sorted(problems_by_user.values(), key=lambda x: x["total_points"], reverse=True)
+
+
 def get_competitions_by_organiser(organiser_id: uuid.UUID):
     query_tuple = (
         """SELECT * FROM competitions WHERE organiser_id = %s ORDER BY start_time DESC""",
