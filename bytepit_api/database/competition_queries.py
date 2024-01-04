@@ -193,5 +193,66 @@ def get_competition_results(competition_id: uuid.UUID):
             )
             problems_by_user[problem["user_id"]]["total_points"] += problem["num_of_points"]
         return sorted(problems_by_user.values(), key=lambda x: x["total_points"], reverse=True)
+
+
+def get_competitions_by_organiser(organiser_id: uuid.UUID):
+    query_tuple = (
+        """SELECT * FROM competitions WHERE organiser_id = %s ORDER BY start_time DESC""",
+        (organiser_id,),
+    )
+    result = db.execute_one(query_tuple)
+    if result["result"]:
+        return [Competition(**competition) for competition in result["result"]]
+    else:
+        return []
+
+
+def get_trophies_by_user(user_id: uuid.UUID):
+    query_tuple = (
+        """
+        WITH total_points AS (
+        SELECT
+            competition_id,
+            user_id,
+            SUM(num_of_points) as total_points
+        FROM
+            problem_results
+        GROUP BY
+            competition_id,
+            user_id
+        ),
+        top_3_in_each_competition AS (
+        SELECT
+            competition_id,
+            user_id,
+            total_points,
+            ROW_NUMBER() OVER(
+            PARTITION BY competition_id
+            ORDER BY
+                total_points DESC
+            ) as rn
+        FROM
+            total_points
+        )
+        SELECT
+        top_3_in_each_competition.competition_id,
+        top_3_in_each_competition.rn AS rank_in_competition,
+        trophies.icon
+        FROM
+        top_3_in_each_competition
+        LEFT JOIN trophies ON top_3_in_each_competition.competition_id = trophies.competition_id
+        AND rn = position
+        WHERE
+        rn <= 3
+        AND top_3_in_each_competition.competition_id IS NOT NULL
+        AND top_3_in_each_competition.user_id = %s
+        ORDER BY
+        total_points DESC;
+        """,
+        (user_id,),
+    )
+    result = db.execute_one(query_tuple)
+    if result["result"]:
+        return result["result"]
     else:
         return []

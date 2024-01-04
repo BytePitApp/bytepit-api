@@ -74,3 +74,10 @@ async def get_competition_results(
     competition_id: uuid.UUID, current_user: Annotated[User, Depends(get_current_verified_user)]
 ):
     return competition_service.get_competition_results(competition_id)
+
+
+@router.get("/competitions-by-organiser/{organiser_id}", response_model=List[CompetitionDTO])
+async def get_competitions_by_organiser(
+    organiser_id: uuid.UUID, current_user: Annotated[User, Depends(get_current_verified_user)]
+):
+    return competition_service.get_competitions_by_organiser(organiser_id)
