@@ -5,7 +5,7 @@ from typing import Annotated, List
 import bytepit_api.services.competition_service as competition_service
 
 from bytepit_api.dependencies.auth_dependencies import get_current_approved_organiser, get_current_verified_user
-from bytepit_api.models.dtos import CompetitionDTO, CreateCompetitionDTO, ModifyCompetitionDTO
+from bytepit_api.models.dtos import CompetitionDTO, CompetitionResultDTO, CreateCompetitionDTO, ModifyCompetitionDTO
 from bytepit_api.models.db_models import User
 
 
@@ -18,6 +18,9 @@ async def create_competition(
     current_user: Annotated[User, Depends(get_current_approved_organiser)],
 ):
     return competition_service.create_competition(form_data, current_user.id)
+
+
+# TODO: create virtual competition
 
 
 @router.get("", response_model=List[CompetitionDTO])
@@ -64,6 +67,13 @@ async def delete_competition(
     competition_id: uuid.UUID, current_user: Annotated[User, Depends(get_current_approved_organiser)]
 ):
     return competition_service.delete_competition(competition_id)
+
+
+@router.get("/{competition_id}/results", response_model=List[CompetitionResultDTO])
+async def get_competition_results(
+    competition_id: uuid.UUID, current_user: Annotated[User, Depends(get_current_verified_user)]
+):
+    return competition_service.get_competition_results(competition_id)
 
 
 @router.get("/competitions-by-organiser/{organiser_id}", response_model=List[CompetitionDTO])
