@@ -1,7 +1,6 @@
 import os
 from azure.communication.email import EmailClient
 
-
 client = EmailClient.from_connection_string(os.environ.get("COMMUNICATION_SERVICES_CONNECTION_STRING"))
 
 
