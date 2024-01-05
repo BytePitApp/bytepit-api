@@ -15,7 +15,6 @@ router = APIRouter(prefix="/api")
 router.include_router(admin_router)
 router.include_router(auth_router)
 router.include_router(competition_router)
-router.include_router(organiser_router)
 router.include_router(problem_router)
 
 app = FastAPI()
