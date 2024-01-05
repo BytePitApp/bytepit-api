@@ -5,7 +5,6 @@ from fastapi.responses import JSONResponse
 from bytepit_api.routers.admin import router as admin_router
 from bytepit_api.routers.auth import router as auth_router
 from bytepit_api.routers.problem import router as problem_router
-from bytepit_api.routers.organiser import router as organiser_router
 from bytepit_api.routers.competition import router as competition_router
 
 from pydantic import ValidationError

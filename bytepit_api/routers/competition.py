@@ -20,7 +20,12 @@ async def create_competition(
     return competition_service.create_competition(form_data, current_user.id)
 
 
-# TODO: create virtual competition
+@router.post("/virtual")
+async def create_virtual_competition(
+    parent_competition_id: uuid.UUID,
+    current_user: Annotated[User, Depends(get_current_approved_organiser)],
+):
+    return competition_service.create_virtual_competition(parent_competition_id, current_user.id)
 
 
 @router.get("", response_model=List[CompetitionDTO])
