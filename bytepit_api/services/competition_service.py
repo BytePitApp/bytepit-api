@@ -1,3 +1,4 @@
+import datetime
 import uuid
 from fastapi import status, HTTPException, Response
 
@@ -104,6 +105,36 @@ def create_competition(form_data: CreateCompetitionDTO, current_user: uuid.UUID)
     competition_queries.insert_trophy(result, 1, form_data.first_place_trophy)
     competition_queries.insert_trophy(result, 2, form_data.second_place_trophy)
     competition_queries.insert_trophy(result, 3, form_data.third_place_trophy)
+    return Response(status_code=status.HTTP_201_CREATED)
+
+
+def create_virtual_competition(parent_competition_id: uuid.UUID, current_user: uuid.UUID):
+    competition = competition_queries.get_competition(parent_competition_id)
+    if not competition:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Parent competition not found",
+        )
+    problems = problem_queries.get_problems_by_competition(parent_competition_id)
+    problem_ids = [problem.id for problem in problems]
+    competition_duration = competition.end_time - competition.start_time
+    competition_start_time = datetime.datetime.now()
+    competition_end_time = competition_start_time + competition_duration
+
+    result = competition_queries.insert_competition(
+        competition.name,
+        competition.description,
+        competition_start_time,
+        competition_end_time,
+        problem_ids,
+        current_user,
+        parent_competition_id,
+    )
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Something went wrong. Please try again.",
+        )
     return Response(status_code=status.HTTP_201_CREATED)
 
 

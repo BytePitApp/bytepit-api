@@ -241,11 +241,14 @@ def get_trophies_by_user(user_id: uuid.UUID):
         FROM
         top_3_in_each_competition
         LEFT JOIN trophies ON top_3_in_each_competition.competition_id = trophies.competition_id
+        INNER JOIN competitions ON competitions.id = top_3_in_each_competition.competition_id
         AND rn = position
         WHERE
         rn <= 3
         AND top_3_in_each_competition.competition_id IS NOT NULL
         AND top_3_in_each_competition.user_id = %s
+        AND competitions.end_time < NOW()
+        AND competitions.parent_id IS NULL
         ORDER BY
         total_points DESC;
         """,
