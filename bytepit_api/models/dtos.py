@@ -227,8 +227,10 @@ class CompetitionResultDTO(BaseModel):
 class ProblemResultStatusDTO(BaseModel):
     is_correct: bool
     is_runtime_ok: bool
-    exception: Union[str, None] = None
     has_improved: bool
+    points: float
+    incorrect_outputs: List[dict]
+    exception: Union[str, None] = None
 
 
 class TrophiesByUserDTO(BaseModel):
