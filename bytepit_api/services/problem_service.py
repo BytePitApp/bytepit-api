@@ -103,6 +103,12 @@ def create_submission(current_user_id: uuid.UUID, submission: CreateSubmissionDT
             and submission_result["execution_time"] < problem.runtime_limit
         ]
     )
+    incorrect_outputs = [
+        {"output": submission_result["output"], "expected_output": submission_result["expected_output"]}
+        for submission_result in submission_results
+        if submission_result["output"] != submission_result["expected_output"]
+    ]
+
     total_points = (correct_submissions / len(submission_results)) * problem.num_of_points
     total_runtime = sum([submission_result["execution_time"] for submission_result in submission_results])
     average_runtime = total_runtime / len(submission_results)
@@ -121,6 +127,8 @@ def create_submission(current_user_id: uuid.UUID, submission: CreateSubmissionDT
         "is_correct": is_correct,
         "is_runtime_ok": average_runtime < problem.runtime_limit,
         "has_improved": status,
+        "points": total_points,
+        "incorrect_outputs": incorrect_outputs,
         "exception": result["exception"] if result["exception"] else None,
     }
 
