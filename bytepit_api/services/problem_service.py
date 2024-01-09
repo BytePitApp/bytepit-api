@@ -100,7 +100,7 @@ def create_submission(current_user_id: uuid.UUID, submission: CreateSubmissionDT
             submission_result
             for submission_result in submission_results
             if submission_result["output"] == submission_result["expected_output"]
-            and submission_result["execution_time"] < problem.runtime_limit
+            and submission_result["execution_time"] < problem.runtime_limit * 1000
         ]
     )
     incorrect_outputs = [
