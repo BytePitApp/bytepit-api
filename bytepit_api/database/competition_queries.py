@@ -7,7 +7,16 @@ from bytepit_api.models.dtos import ProblemDTO
 
 
 def get_competitions():
-    query_tuple = ("""SELECT * FROM competitions""", ())
+    query_tuple = ("""SELECT * FROM competitions WHERE parent_id IS NULL""", ())
+    result = db.execute_one(query_tuple)
+    if result["result"]:
+        return [Competition(**competition) for competition in result["result"]]
+    else:
+        return []
+
+
+def get_virtual_competitions():
+    query_tuple = ("""SELECT * FROM competitions WHERE parent_id IS NOT NULL""", ())
     result = db.execute_one(query_tuple)
     if result["result"]:
         return [Competition(**competition) for competition in result["result"]]
@@ -74,7 +83,7 @@ def get_problems(problem_ids: List[uuid.UUID]):
 
 def get_active_competitions():
     query_tuple = (
-        """SELECT * FROM competitions WHERE start_time < NOW() AND end_time > NOW() ORDER BY start_time ASC""",
+        """SELECT * FROM competitions WHERE start_time < NOW() AND end_time > NOW() AND parent_id IS NULL ORDER BY start_time ASC""",
         (),
     )
     result = db.execute_one(query_tuple)
@@ -86,7 +95,7 @@ def get_active_competitions():
 
 def get_random_competition():
     query_tuple = (
-        """SELECT * FROM competitions ORDER BY RANDOM() LIMIT 1""",
+        """SELECT * FROM competitions WHERE parent_id IS NULL ORDER BY RANDOM() LIMIT 1""",
         (),
     )
     result = db.execute_one(query_tuple)
@@ -98,7 +107,19 @@ def get_random_competition():
 
 def get_competition(competition_id: uuid.UUID):
     query_tuple = (
-        """SELECT * FROM competitions WHERE id = %s""",
+        """SELECT * FROM competitions WHERE id = %s AND parent_id IS NULL""",
+        (competition_id,),
+    )
+    result = db.execute_one(query_tuple)
+    if result["result"]:
+        return Competition(**result["result"][0])
+    else:
+        return None
+
+
+def get_virtual_competition(competition_id: uuid.UUID):
+    query_tuple = (
+        """SELECT * FROM competitions WHERE id = %s AND parent_id IS NOT NULL""",
         (competition_id,),
     )
     result = db.execute_one(query_tuple)
@@ -193,6 +214,8 @@ def get_competition_results(competition_id: uuid.UUID):
             )
             problems_by_user[problem["user_id"]]["total_points"] += problem["num_of_points"]
         return sorted(problems_by_user.values(), key=lambda x: x["total_points"], reverse=True)
+    else:
+        return []
 
 
 def get_competitions_by_organiser(organiser_id: uuid.UUID):
