@@ -24,7 +24,7 @@ def get_all_competitions():
     return competitions_dtos
 
 
-def get_virtual_competitions():
+def get_all_virtual_competitions():
     competitions = competition_queries.get_virtual_competitions()
     competitions_dtos = []
     for competition in competitions:

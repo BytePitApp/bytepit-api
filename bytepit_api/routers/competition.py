@@ -35,7 +35,7 @@ async def get_all_competitions(current_user: Annotated[User, Depends(get_current
 
 @router.get("/virtual", response_model=List[CompetitionDTO])
 async def get_all_virtual_competitions(current_user: Annotated[User, Depends(get_current_verified_user)]):
-    return competition_service.get_virtual_competitions()
+    return competition_service.get_all_virtual_competitions()
 
 
 @router.get("/active", response_model=List[CompetitionDTO])
