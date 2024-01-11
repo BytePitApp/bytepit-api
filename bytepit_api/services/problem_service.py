@@ -127,7 +127,7 @@ def create_submission(current_user_id: uuid.UUID, submission: CreateSubmissionDT
     )
     return {
         "is_correct": is_correct,
-        "is_runtime_ok": average_runtime < problem.runtime_limit * 1000,
+        "is_runtime_ok": average_runtime < problem.runtime_limit * 1000 * 1000,
         "has_improved": has_improved,
         "points": total_points,
         "incorrect_outputs": incorrect_outputs,
