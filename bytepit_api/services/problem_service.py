@@ -72,8 +72,10 @@ def create_submission(current_user_id: uuid.UUID, submission: CreateSubmissionDT
     if submission.competition_id:
         competition = competition_queries.get_competition(submission.competition_id)
         if not competition:
+            competition = competition_queries.get_virtual_competition(submission.competition_id)
+        if not competition:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Could not found competition")
-        if competition.start_time > datetime.now() or competition.end_time < datetime.now():
+        if (competition.start_time > datetime.now() or competition.end_time < datetime.now()) and competition.parent_id is None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Competition is not running")
         if problem.id not in competition.problems:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Problem is not in competition")
@@ -113,7 +115,7 @@ def create_submission(current_user_id: uuid.UUID, submission: CreateSubmissionDT
     total_runtime = sum([submission_result["execution_time"] for submission_result in submission_results])
     average_runtime = total_runtime / len(submission_results)
     is_correct = total_points == problem.num_of_points
-    status = problem_queries.insert_problem_result(
+    has_improved = problem_queries.insert_problem_result(
         submission.problem_id,
         submission.competition_id,
         current_user_id,
@@ -125,8 +127,8 @@ def create_submission(current_user_id: uuid.UUID, submission: CreateSubmissionDT
     )
     return {
         "is_correct": is_correct,
-        "is_runtime_ok": average_runtime < problem.runtime_limit * 1000,
-        "has_improved": status,
+        "is_runtime_ok": average_runtime < problem.runtime_limit * 1000 * 1000,
+        "has_improved": has_improved,
         "points": total_points,
         "incorrect_outputs": incorrect_outputs,
         "exception": result["exception"] if result["exception"] else None,
