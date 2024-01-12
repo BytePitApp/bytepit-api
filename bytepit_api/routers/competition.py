@@ -43,7 +43,7 @@ async def get_active_competitions(current_user: Annotated[User, Depends(get_curr
     return competition_service.get_active_competitions()
 
 
-@router.get("/random", response_model=List[CompetitionDTO])
+@router.get("/random", response_model=CompetitionDTO)
 async def get_random_competition(current_user: Annotated[User, Depends(get_current_verified_user)]):
     return competition_service.get_random_competition()
 
