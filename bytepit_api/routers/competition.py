@@ -20,7 +20,7 @@ async def create_competition(
     return competition_service.create_competition(form_data, current_user.id)
 
 
-@router.post("/virtual")
+@router.post("/virtual", response_model=str)
 async def create_virtual_competition(
     parent_competition_id: uuid.UUID,
     current_user: Annotated[User, Depends(get_current_verified_user)],
