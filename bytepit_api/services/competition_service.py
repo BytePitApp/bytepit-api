@@ -1,11 +1,21 @@
 import datetime
+import requests
 import uuid
 from fastapi import status, HTTPException, Response
 
+
 from bytepit_api.database import competition_queries, problem_queries
 import bytepit_api.helpers.competition_helpers as competition_helpers
+from bytepit_api.services import auth_service
 
-from bytepit_api.models.dtos import CompetitionDTO, CreateCompetitionDTO, ModifyCompetitionDTO, ProblemDTO, TrophyDTO
+from bytepit_api.models.dtos import (
+    CompetitionDTO,
+    CreateCompetitionDTO,
+    ModifyCompetitionDTO,
+    ProblemDTO,
+    TrophyDTO,
+    UserDTO,
+)
 
 
 def get_all_competitions():
@@ -243,6 +253,11 @@ def get_competition_results(competition_id: uuid.UUID):
             detail=f"No competition with id {competition_id} found",
         )
     results = competition_queries.get_competition_results(competition_id)
+    for result in results:
+        user_id = result["user_id"]
+        user = auth_service.get_user(user_id)
+        result["user_name"] = user.name
+        result["user_surname"] = user.surname
     return results
 
 
@@ -254,6 +269,11 @@ def get_virtual_competition_results(competition_id: uuid.UUID):
             detail=f"No competition with id {competition_id} found",
         )
     results = competition_queries.get_competition_results(competition_id)
+    for result in results:
+        user_id = result["user_id"]
+        user = auth_service.get_user(user_id)
+        result["user_name"] = user.name
+        result["user_surname"] = user.surname
     return results
 
 

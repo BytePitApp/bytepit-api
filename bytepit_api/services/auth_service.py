@@ -1,5 +1,6 @@
 from datetime import timedelta, datetime
 from urllib.parse import quote
+import uuid
 
 from fastapi import HTTPException, status, Response
 
@@ -89,3 +90,10 @@ def confirm_email(verification_token: str):
     if not result:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with id {user.id} not found")
     return {"message": "User activated"}
+
+
+def get_user(id: uuid.UUID):
+    user = auth_queries.get_user_by_id(id)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with id {id} not found")
+    return user
