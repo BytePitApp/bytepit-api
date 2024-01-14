@@ -178,7 +178,7 @@ def create_virtual_competition(parent_competition_id: uuid.UUID, current_user: u
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Something went wrong. Please try again.",
         )
-    return Response(status_code=status.HTTP_201_CREATED)
+    return Response(status_code=status.HTTP_201_CREATED, content=str(result))
 
 
 def set_trophy_to_user(competition_id: uuid.UUID, user_id: uuid.UUID, position: int):
