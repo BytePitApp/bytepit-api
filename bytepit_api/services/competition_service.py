@@ -256,8 +256,7 @@ def get_competition_results(competition_id: uuid.UUID):
     for result in results:
         user_id = result["user_id"]
         user = auth_service.get_user(user_id)
-        result["user_name"] = user.name
-        result["user_surname"] = user.surname
+        result["username"] = user.username
     return results
 
 
@@ -272,8 +271,7 @@ def get_virtual_competition_results(competition_id: uuid.UUID):
     for result in results:
         user_id = result["user_id"]
         user = auth_service.get_user(user_id)
-        result["user_name"] = user.name
-        result["user_surname"] = user.surname
+        result["username"] = user.username
     return results
 
 
