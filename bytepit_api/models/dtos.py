@@ -220,8 +220,7 @@ class CreateSubmissionDTO(BaseModel):
 
 class CompetitionResultDTO(BaseModel):
     user_id: uuid.UUID
-    user_name: str
-    user_surname: str
+    username: str
     total_points: float
     problem_results: List[ProblemResultDTO]
 
