@@ -20,7 +20,7 @@ async def create_competition(
     return competition_service.create_competition(form_data, current_user.id)
 
 
-@router.post("/virtual")
+@router.post("/virtual", response_model=str)
 async def create_virtual_competition(
     parent_competition_id: uuid.UUID,
     current_user: Annotated[User, Depends(get_current_verified_user)],
@@ -43,7 +43,7 @@ async def get_active_competitions(current_user: Annotated[User, Depends(get_curr
     return competition_service.get_active_competitions()
 
 
-@router.get("/random", response_model=List[CompetitionDTO])
+@router.get("/random", response_model=CompetitionDTO)
 async def get_random_competition(current_user: Annotated[User, Depends(get_current_verified_user)]):
     return competition_service.get_random_competition()
 
