@@ -41,6 +41,11 @@ def get_problems_by_organiser(
     return problem_service.get_problems_by_organiser(organiser_id)
 
 
+@router.get("/available", response_model=List[ProblemDTO])
+def get_available_problems(current_user: Annotated[User, Depends(get_current_verified_user)]):
+    return problem_service.get_available_problems()
+
+
 @router.get("/{problem_id}", response_model=ProblemDTO)
 def get_problem(problem_id: uuid.UUID):
     return problem_service.get_problem(problem_id)

@@ -27,6 +27,21 @@ def get_all_problems():
         return None
 
 
+def get_available_problems():
+    query_tuple = (
+        """
+        SELECT * FROM problems where id = ANY (
+	        SELECT DISTINCT unnest(problems) FROM competitions WHERE end_time < NOW() AND parent_id IS NULL
+        )
+        """, ()
+    )
+    result = db.execute_one(query_tuple)
+    if result["result"]:
+        return [Problem(**problem) for problem in result["result"]]
+    else:
+        return None
+
+
 def get_problem(problem_id: uuid.UUID):
     query_tuple = ("SELECT * FROM problems WHERE id = %s", (problem_id,))
     result = db.execute_one(query_tuple)
