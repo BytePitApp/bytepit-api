@@ -15,6 +15,13 @@ def get_all_problems():
     return result
 
 
+def get_available_problems():
+    result = problem_queries.get_available_problems()
+    if not result:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Could not found any problems")
+    return result
+
+
 def get_user_statistics(user_id: uuid.UUID):
     trophies = competition_queries.get_trophies_by_user(user_id)
     trophies_dto = [TrophiesByUserDTO(**trophy) for trophy in trophies]
