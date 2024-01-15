@@ -6,8 +6,8 @@ from bytepit_api.models.db_models import Competition, Trophy
 from bytepit_api.models.dtos import ProblemDTO
 
 
-def get_competitions():
-    query_tuple = ("""SELECT * FROM competitions WHERE parent_id IS NULL""", ())
+def get_competitions(user_id: uuid.UUID):
+    query_tuple = ("""SELECT * FROM competitions WHERE parent_id IS NULL OR organiser_id = %s""", (user_id,))
     result = db.execute_one(query_tuple)
     if result["result"]:
         return [Competition(**competition) for competition in result["result"]]
@@ -107,7 +107,7 @@ def get_random_competition():
 
 def get_competition(competition_id: uuid.UUID):
     query_tuple = (
-        """SELECT * FROM competitions WHERE id = %s AND parent_id IS NULL""",
+        """SELECT * FROM competitions WHERE id = %s""",
         (competition_id,),
     )
     result = db.execute_one(query_tuple)
@@ -181,11 +181,13 @@ def get_competition_results(competition_id: uuid.UUID):
         """
         SELECT
             problems.name,
+            problems.num_of_points AS max_num_of_points,
+            problems.created_on AS created_on,
             problem_results.*
         FROM problem_results
         JOIN problems
         ON problems.id = problem_results.problem_id
-        WHERE  competition_id = %s;  
+        WHERE competition_id = %s;  
         """,
         (competition_id,),
     )
@@ -198,6 +200,7 @@ def get_competition_results(competition_id: uuid.UUID):
                     "user_id": problem["user_id"],
                     "total_points": 0,
                     "problem_results": [],
+                    "rank_in_competition": -1,
                 }
             problems_by_user[problem["user_id"]]["problem_results"].append(
                 {
@@ -206,6 +209,8 @@ def get_competition_results(competition_id: uuid.UUID):
                     "user_id": problem["user_id"],
                     "competition_id": problem["competition_id"],
                     "num_of_points": problem["num_of_points"],
+                    "max_num_of_points": problem["max_num_of_points"],
+                    "created_on": problem["created_on"],
                     "source_code": problem["source_code"],
                     "language": problem["language"],
                     "average_runtime": problem["average_runtime"],
@@ -213,7 +218,27 @@ def get_competition_results(competition_id: uuid.UUID):
                 }
             )
             problems_by_user[problem["user_id"]]["total_points"] += problem["num_of_points"]
-        return sorted(problems_by_user.values(), key=lambda x: x["total_points"], reverse=True)
+
+        sorted_problems_by_user = sorted(problems_by_user.values(), key=lambda x: x["total_points"], reverse=True)
+
+        for user_data in sorted_problems_by_user:
+            user_data["problem_results"] = sorted(user_data["problem_results"], key=lambda x: x["created_on"])
+            for problem_result in user_data["problem_results"]:
+                del problem_result["created_on"]
+
+        for i in range(len(sorted_problems_by_user)):
+            if sorted_problems_by_user[i - 1]["total_points"] == sorted_problems_by_user[i]["total_points"]:
+                sorted_problems_by_user[i]["rank_in_competition"] = sorted_problems_by_user[i - 1][
+                    "rank_in_competition"
+                ]
+            else:
+                if i == 0:
+                    sorted_problems_by_user[i]["rank_in_competition"] = 1
+                else:
+                    sorted_problems_by_user[i]["rank_in_competition"] = (
+                        sorted_problems_by_user[i - 1]["rank_in_competition"] + 1
+                    )
+        return sorted_problems_by_user
     else:
         return []
 

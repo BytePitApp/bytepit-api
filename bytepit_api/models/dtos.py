@@ -206,6 +206,7 @@ class ProblemResultDTO(BaseModel):
     average_runtime: float
     is_correct: bool
     num_of_points: float
+    max_num_of_points: float
     source_code: str
     language: Language
 
@@ -222,6 +223,7 @@ class CompetitionResultDTO(BaseModel):
     user_id: uuid.UUID
     username: str
     total_points: float
+    rank_in_competition: int
     problem_results: List[ProblemResultDTO]
 
 

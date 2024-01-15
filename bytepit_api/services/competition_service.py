@@ -18,8 +18,8 @@ from bytepit_api.models.dtos import (
 )
 
 
-def get_all_competitions():
-    competitions = competition_queries.get_competitions()
+def get_all_competitions(user_id: uuid.UUID):
+    competitions = competition_queries.get_competitions(user_id)
     competitions_dtos = []
     for competition in competitions:
         problems = problem_queries.get_problems_by_competition(competition.id)
@@ -105,7 +105,7 @@ def get_virtual_competition(competition_id: uuid.UUID):
     if not competition:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No competition with id {competition_id} found",
+            detail=f"No virtual competition with id {competition_id} found",
         )
     problems = problem_queries.get_problems_by_competition(competition.id)
     trophies = competition_queries.get_trophies_by_competition(competition.parent_id)
@@ -260,14 +260,37 @@ def get_competition_results(competition_id: uuid.UUID):
     return results
 
 
-def get_virtual_competition_results(competition_id: uuid.UUID):
-    competition = competition_queries.get_virtual_competition(competition_id)
+def get_virtual_competition_results(competition_id: uuid.UUID, current_user_id: uuid.UUID):
+    competition = competition_queries.get_competition(competition_id)
     if not competition:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"No competition with id {competition_id} found",
         )
-    results = competition_queries.get_competition_results(competition_id)
+    results = competition_queries.get_competition_results(competition.parent_id)
+    print("############################### RESULTS ###############################")
+    print(results)
+    user_virtual_result = problem_queries.get_virtual_competition_results_for_user(competition_id, current_user_id)
+    if not user_virtual_result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No virtual competition result for user with id {current_user_id} found",
+        )
+    print("############################### USER VIRTUAL RESULTS ###############################")
+    print(user_virtual_result)
+    results.append(user_virtual_result)
+
+    results = sorted(results, key=lambda x: x["total_points"], reverse=True)
+
+    for i in range(len(results)):
+        if results[i - 1]["total_points"] == results[i]["total_points"]:
+            results[i]["rank_in_competition"] = results[i - 1]["rank_in_competition"]
+        else:
+            if i == 0:
+                results[i]["rank_in_competition"] = 1
+            else:
+                results[i]["rank_in_competition"] = results[i - 1]["rank_in_competition"] + 1
+
     for result in results:
         user_id = result["user_id"]
         user = auth_service.get_user(user_id)
