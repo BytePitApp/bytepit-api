@@ -1,4 +1,5 @@
 from typing import Annotated
+import uuid
 
 from fastapi import APIRouter, Depends, Response
 
@@ -34,3 +35,8 @@ def logout(response: Response):
 @router.get("/current", response_model=UserDTO)
 def get_current_user(current_user: Annotated[User, Depends(get_current_verified_user)]):
     return current_user
+
+
+@router.get("/{id}", response_model=UserDTO)
+def get_user(id: uuid.UUID, current_user: Annotated[User, Depends(get_current_verified_user)]):
+    return auth_service.get_user(id)

@@ -59,7 +59,7 @@ async def send_verification_email(email, token):
     }
     try:
         poller = client.begin_send(message)
-        result = poller.result()
+        # result = poller.result()
     except Exception as e:
         print(e)
         return False

@@ -60,3 +60,12 @@ def get_user_by_verification_token(verification_token: str):
         return User(**result["result"][0])
     else:
         return None
+
+
+def get_user_by_id(id: uuid.UUID):
+    query_tuple = ("SELECT * FROM users WHERE id = %s", (id,))
+    result = db.execute_one(query_tuple)
+    if result["result"]:
+        return User(**result["result"][0])
+    else:
+        return None

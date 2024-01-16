@@ -30,7 +30,7 @@ async def create_virtual_competition(
 
 @router.get("", response_model=List[CompetitionDTO])
 async def get_all_competitions(current_user: Annotated[User, Depends(get_current_verified_user)]):
-    return competition_service.get_all_competitions()
+    return competition_service.get_all_competitions(current_user.id)
 
 
 @router.get("/virtual", response_model=List[CompetitionDTO])
@@ -98,7 +98,7 @@ async def get_competition_results(
 async def get_virtual_competition_results(
     competition_id: uuid.UUID, current_user: Annotated[User, Depends(get_current_verified_user)]
 ):
-    return competition_service.get_virtual_competition_results(competition_id)
+    return competition_service.get_virtual_competition_results(competition_id, current_user.id)
 
 
 @router.get("/competitions-by-organiser/{organiser_id}", response_model=List[CompetitionDTO])
