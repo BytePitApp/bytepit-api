@@ -268,16 +268,17 @@ def get_virtual_competition_results(competition_id: uuid.UUID, current_user_id: 
             detail=f"No competition with id {competition_id} found",
         )
     results = competition_queries.get_competition_results(competition.parent_id)
-    print("############################### RESULTS ###############################")
-    print(results)
+
+    for result in results:
+        if result["user_id"] == current_user_id:
+            results.remove(result)
+
     user_virtual_result = problem_queries.get_virtual_competition_results_for_user(competition_id, current_user_id)
     if not user_virtual_result:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"No virtual competition result for user with id {current_user_id} found",
         )
-    print("############################### USER VIRTUAL RESULTS ###############################")
-    print(user_virtual_result)
     results.append(user_virtual_result)
 
     results = sorted(results, key=lambda x: x["total_points"], reverse=True)
