@@ -3,7 +3,7 @@ pydantic[email]
 uvicorn
 requests
 python-multipart
-psycopg
+psycopg[binary]
 python-jose
 passlib[bcrypt]
 azure-storage-blob
