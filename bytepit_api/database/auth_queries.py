@@ -1,6 +1,7 @@
 import uuid
 from bytepit_api.database import db
 from bytepit_api.models.db_models import User
+from bytepit_api.models.enums import RegisterRole
 
 
 def get_user_by_email(email: str):
@@ -21,7 +22,16 @@ def get_user_by_username(username: str):
         return None
 
 
-def create_user(username, password_hash, name, surname, email, role, confirmation_token, image=None):
+def create_user(
+    username: str,
+    password_hash: str,
+    name: str,
+    surname: str,
+    email: str,
+    role: RegisterRole,
+    confirmation_token: str,
+    image=None,
+):
     approved_by_admin = False if role == "organiser" else True
     image_binary = image.file.read() if image else None
     user_insert_query = (
