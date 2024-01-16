@@ -213,3 +213,59 @@ def get_problems_by_organiser(organiser_id: uuid.UUID):
         return [Problem(**problem) for problem in result["result"]]
     else:
         return None
+
+
+def get_virtual_competition_results_for_user(competition_id: uuid.UUID, user_id: uuid.UUID):
+    query_tuple = (
+        """
+        SELECT
+            problems.name,
+            problems.num_of_points AS max_num_of_points,
+            problems.created_on AS created_on,
+            problem_results.*
+        FROM problem_results
+        JOIN problems
+        ON problems.id = problem_results.problem_id
+        JOIN competitions
+        ON competitions.id = problem_results.competition_id 
+        WHERE problem_results.user_id = %s
+		AND competitions.parent_id = %s;
+        """,
+        (
+            user_id,
+            competition_id,
+        ),
+    )
+    result = db.execute_one(query_tuple)
+    if not result:
+        return None
+    user_result = {
+        "user_id": user_id,
+        "total_points": 0,
+        "problem_results": [],
+        "rank_in_competition": -1,
+    }
+
+    for problem in result["result"]:
+        user_result["problem_results"].append(
+            {
+                "id": problem["id"],
+                "problem_id": problem["problem_id"],
+                "user_id": problem["user_id"],
+                "competition_id": problem["competition_id"],
+                "num_of_points": problem["num_of_points"],
+                "max_num_of_points": problem["max_num_of_points"],
+                "created_on": problem["created_on"],
+                "source_code": problem["source_code"],
+                "language": problem["language"],
+                "average_runtime": problem["average_runtime"],
+                "is_correct": problem["is_correct"],
+            }
+        )
+        user_result["total_points"] += problem["num_of_points"]
+
+    user_result["problem_results"] = sorted(user_result["problem_results"], key=lambda x: x["created_on"])
+    for problem_result in user_result["problem_results"]:
+        del problem_result["created_on"]
+
+    return user_result
