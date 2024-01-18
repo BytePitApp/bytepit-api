@@ -238,6 +238,7 @@ class ProblemResultStatusDTO(BaseModel):
 
 class TrophiesByUserDTO(BaseModel):
     competition_id: uuid.UUID
+    competition_name: str
     rank_in_competition: int
     icon: Union[bytes, None] = None
 
@@ -250,6 +251,6 @@ class TrophiesByUserDTO(BaseModel):
 
 
 class UserStatisticsDTO(BaseModel):
-    total_submissions: int
-    correct_submissions: int
+    total_submissions: Union[int, None] = None
+    correct_submissions: Union[int, None] = None
     trophies: List[TrophiesByUserDTO]
