@@ -82,7 +82,9 @@ def create_submission(current_user_id: uuid.UUID, submission: CreateSubmissionDT
             competition = competition_queries.get_virtual_competition(submission.competition_id)
         if not competition:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Could not found competition")
-        if (competition.start_time > datetime.now() or competition.end_time < datetime.now()) and competition.parent_id is None:
+        if (
+            competition.start_time > datetime.now() or competition.end_time < datetime.now()
+        ) and competition.parent_id is None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Competition is not running")
         if problem.id not in competition.problems:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Problem is not in competition")
@@ -94,8 +96,6 @@ def create_submission(current_user_id: uuid.UUID, submission: CreateSubmissionDT
 
         if result["exception"]:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result["exception"])
-
-        result["stdout"] = blob_storage_helpers.remove_trailing_newline(result["stdout"])
 
         submission_results.append(
             {
