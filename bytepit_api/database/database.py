@@ -23,6 +23,9 @@ class Database:
         sys.exit(1)
 
     def execute_one(self, query_tuple: tuple):
+        self._check_connection()
+        if self.connection.closed:
+            self.connection = self.connect(self.connection.dsn)
         try:
             assert isinstance(query_tuple[0], str), "Query must be a string"
             assert (
@@ -43,6 +46,7 @@ class Database:
             return {"affected_rows": 0}
 
     def execute_many(self, query_tuple_list: List[tuple]):
+        self._check_connection()
         try:
             total_affected_rows = 0
             cursor = self.connection.cursor()
@@ -59,3 +63,7 @@ class Database:
         except psycopg.Error as e:
             print(e)
             return {"affected_rows": 0}
+
+    def _check_connection(self):
+        if self.connection.closed:
+            self.connection = self.connect(self.connection.dsn)
