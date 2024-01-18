@@ -227,17 +227,16 @@ def get_competition_results(competition_id: uuid.UUID):
                 del problem_result["created_on"]
 
         for i in range(len(sorted_problems_by_user)):
-            if sorted_problems_by_user[i - 1]["total_points"] == sorted_problems_by_user[i]["total_points"]:
+            if i == 0:
+                sorted_problems_by_user[i]["rank_in_competition"] = 1
+            elif sorted_problems_by_user[i - 1]["total_points"] == sorted_problems_by_user[i]["total_points"]:
                 sorted_problems_by_user[i]["rank_in_competition"] = sorted_problems_by_user[i - 1][
                     "rank_in_competition"
                 ]
             else:
-                if i == 0:
-                    sorted_problems_by_user[i]["rank_in_competition"] = 1
-                else:
-                    sorted_problems_by_user[i]["rank_in_competition"] = (
-                        sorted_problems_by_user[i - 1]["rank_in_competition"] + 1
-                    )
+                sorted_problems_by_user[i]["rank_in_competition"] = (
+                    sorted_problems_by_user[i - 1]["rank_in_competition"] + 1
+                )
         return sorted_problems_by_user
     else:
         return []
