@@ -33,7 +33,8 @@ def get_available_problems():
         SELECT * FROM problems where id = ANY (
 	        SELECT DISTINCT unnest(problems) FROM competitions WHERE end_time < NOW() AND parent_id IS NULL
         )
-        """, ()
+        """,
+        (),
     )
     result = db.execute_one(query_tuple)
     if result["result"]:
@@ -212,7 +213,7 @@ def get_problems_by_organiser(organiser_id: uuid.UUID):
     if result["result"]:
         return [Problem(**problem) for problem in result["result"]]
     else:
-        return None
+        return []
 
 
 def get_virtual_competition_results_for_user(competition_id: uuid.UUID, user_id: uuid.UUID):
