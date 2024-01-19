@@ -9,17 +9,11 @@ from bytepit_api.models.dtos import CreateSubmissionDTO, CreateProblemDTO, Modif
 
 
 def get_all_problems():
-    result = problem_queries.get_all_problems()
-    if not result:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Could not found any problems")
-    return result
+    return problem_queries.get_all_problems()
 
 
 def get_available_problems():
-    result = problem_queries.get_available_problems()
-    if not result:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Could not found any problems")
-    return result
+    return problem_queries.get_available_problems()
 
 
 def get_user_statistics(user_id: uuid.UUID):
