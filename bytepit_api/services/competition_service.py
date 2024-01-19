@@ -4,8 +4,7 @@ from fastapi import status, HTTPException, Response
 
 
 from bytepit_api.database import competition_queries, problem_queries, auth_queries
-import bytepit_api.helpers.competition_helpers as competition_helpers
-from bytepit_api.services import auth_service
+from bytepit_api.helpers import competition_helpers
 
 from bytepit_api.models.dtos import (
     CompetitionDTO,
@@ -201,7 +200,7 @@ def get_competition_results(competition_id: uuid.UUID):
     results = competition_queries.get_competition_results(competition_id)
     for result in results:
         user_id = result["user_id"]
-        user = auth_service.get_user(user_id)
+        user = auth_queries.get_user_by_id(user_id)
         result["username"] = user.username
     return results
 
@@ -240,7 +239,7 @@ def get_virtual_competition_results(competition_id: uuid.UUID, current_user_id: 
 
     for result in results:
         user_id = result["user_id"]
-        user = auth_service.get_user(user_id)
+        user = auth_queries.get_user_by_id(user_id)
         result["username"] = user.username
     return results
 
