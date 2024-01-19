@@ -29,18 +29,10 @@ async def create_virtual_competition(
 
 
 @router.get("", response_model=List[CompetitionDTO])
-async def get_all_competitions(current_user: Annotated[User, Depends(get_current_verified_user)]):
-    return competition_service.get_all_competitions(current_user.id)
-
-
-@router.get("/virtual", response_model=List[CompetitionDTO])
-async def get_all_virtual_competitions(current_user: Annotated[User, Depends(get_current_verified_user)]):
-    return competition_service.get_all_virtual_competitions()
-
-
-@router.get("/active", response_model=List[CompetitionDTO])
-async def get_active_competitions(current_user: Annotated[User, Depends(get_current_verified_user)]):
-    return competition_service.get_active_competitions()
+async def get_all_competitions(
+    current_user: Annotated[User, Depends(get_current_verified_user)], trophies: bool = False
+):
+    return competition_service.get_all_competitions(current_user.id, trophies)
 
 
 @router.get("/random", response_model=CompetitionDTO)
@@ -51,24 +43,6 @@ async def get_random_competition(current_user: Annotated[User, Depends(get_curre
 @router.get("/{competition_id}", response_model=CompetitionDTO)
 async def get_competition(competition_id: uuid.UUID, current_user: Annotated[User, Depends(get_current_verified_user)]):
     return competition_service.get_competition(competition_id)
-
-
-@router.get("/virtual/{competition_id}", response_model=CompetitionDTO)
-async def get_virtual_competition(
-    competition_id: uuid.UUID,
-    current_user: Annotated[User, Depends(get_current_verified_user)]
-):
-    return competition_service.get_virtual_competition(competition_id)
-
-
-@router.post("/{competition_id}/trophy/{user_id}")
-async def set_trophy_to_user(
-    competition_id: uuid.UUID,
-    user_id: uuid.UUID,
-    position: int,
-    current_user: Annotated[User, Depends(get_current_verified_user)],
-):
-    return competition_service.set_trophy_to_user(competition_id, user_id, position)
 
 
 @router.patch("/{competition_id}")
@@ -103,6 +77,6 @@ async def get_virtual_competition_results(
 
 @router.get("/competitions-by-organiser/{organiser_id}", response_model=List[CompetitionDTO])
 async def get_competitions_by_organiser(
-    organiser_id: uuid.UUID, current_user: Annotated[User, Depends(get_current_verified_user)]
+    organiser_id: uuid.UUID, current_user: Annotated[User, Depends(get_current_verified_user)], trophies: bool = False
 ):
-    return competition_service.get_competitions_by_organiser(organiser_id)
+    return competition_service.get_competitions_by_organiser(organiser_id, trophies)
