@@ -15,15 +15,6 @@ def get_competitions(user_id: uuid.UUID):
         return []
 
 
-def get_virtual_competitions():
-    query_tuple = ("""SELECT * FROM competitions WHERE parent_id IS NOT NULL""", ())
-    result = db.execute_one(query_tuple)
-    if result["result"]:
-        return [Competition(**competition) for competition in result["result"]]
-    else:
-        return []
-
-
 def get_trophies_by_competition(competition_id: uuid.UUID):
     query_tuple = ("""SELECT * FROM trophies WHERE competition_id = %s""", (competition_id,))
     result = db.execute_one(query_tuple)
@@ -81,18 +72,6 @@ def get_problems(problem_ids: List[uuid.UUID]):
         return []
 
 
-def get_active_competitions():
-    query_tuple = (
-        """SELECT * FROM competitions WHERE start_time < NOW() AND end_time > NOW() AND parent_id IS NULL ORDER BY start_time ASC""",
-        (),
-    )
-    result = db.execute_one(query_tuple)
-    if result["result"]:
-        return [Competition(**competition) for competition in result["result"]]
-    else:
-        return []
-
-
 def get_random_competition():
     query_tuple = (
         """SELECT * FROM competitions WHERE parent_id IS NULL ORDER BY RANDOM() LIMIT 1""",
@@ -127,19 +106,6 @@ def get_virtual_competition(competition_id: uuid.UUID):
         return Competition(**result["result"][0])
     else:
         return None
-
-
-def set_user_trophy(competition_id: uuid.UUID, user_id: uuid.UUID, position: int):
-    query_tuple = (
-        """
-        UPDATE trophies
-        SET user_id = %s
-        WHERE competition_id = %s AND position = %s
-        """,
-        (user_id, competition_id, position),
-    )
-    result = db.execute_one(query_tuple)
-    return result["affected_rows"] == 1
 
 
 def modify_competition(competition_id: uuid.UUID, competition: Competition):
