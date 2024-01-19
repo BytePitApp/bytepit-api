@@ -118,7 +118,7 @@ def test_create_problem_bad():
     from io import BytesIO
 
     database.problem_queries = AsyncMock()
-    database.problem_queries.insert_problem = AsyncMock(return_value=uuid.uuid4())  # Mock insert_problem instead of create_problem
+    database.problem_queries.insert_problem = AsyncMock(return_value=uuid.uuid4())  
 
     problem_dto_mock = MagicMock(spec=CreateProblemDTO)
     problem_dto_mock.name = "Test Problem"
@@ -143,3 +143,72 @@ def test_create_problem_bad():
 
     with pytest.raises(HTTPException):
         result = create_problem(problem_dto_mock, current_user_id)
+
+
+def test_create_competition():
+    from fastapi import Response
+    from bytepit_api import database
+    from bytepit_api.models.dtos import CreateCompetitionDTO
+    from bytepit_api.services.competition_service import create_competition
+    import uuid
+    from unittest.mock import AsyncMock, MagicMock
+    from datetime import datetime
+
+    database.competition_queries = MagicMock()
+    database.competition_queries.insert_competition = AsyncMock(return_value=uuid.uuid4())
+    problemlist = [uuid.uuid4(), uuid.uuid4()]  
+    database.competition_queries.get_problems = AsyncMock(return_value=problemlist)  
+    print(len(problemlist))
+    competition_dto_mock = MagicMock(spec=CreateCompetitionDTO)
+    competition_dto_mock.name = "Test Competition"
+    competition_dto_mock.description = "This is a test competition"
+    competition_dto_mock.start_time = datetime.strptime("2021-01-01T00:00:00", "%Y-%m-%dT%H:%M:%S")
+    competition_dto_mock.end_time = datetime.strptime("2021-01-02T00:00:00", "%Y-%m-%dT%H:%M:%S")
+    competition_dto_mock.is_private = False
+    competition_dto_mock.image = None
+    competition_dto_mock.organiser_id = uuid.uuid4()
+    competition_dto_mock.problems = database.competition_queries.get_problems
+    competition_dto_mock.first_place_trophy = None
+    competition_dto_mock.second_place_trophy = None
+    competition_dto_mock.third_place_trophy = None
+    competition_dto_mock.parent_id = uuid.uuid4()
+
+    result = create_competition(competition_dto_mock, competition_dto_mock.organiser_id)
+
+    assert isinstance(result, Response)
+    assert result.status_code == 201
+
+
+def test_create_competition_bad():
+    from bytepit_api import database
+    from bytepit_api.models.dtos import CreateCompetitionDTO
+    from bytepit_api.services.competition_service import create_competition
+    import uuid
+    from unittest.mock import AsyncMock, MagicMock
+    from datetime import datetime
+
+    database.competition_queries = MagicMock()
+    database.competition_queries.insert_competition = AsyncMock(return_value=uuid.uuid4())
+     
+    competition_dto_mock = MagicMock(spec=CreateCompetitionDTO)
+    competition_dto_mock.name = "Test Competition"
+    competition_dto_mock.description = "This is a test competition"
+    competition_dto_mock.start_time = datetime.strptime("2021-01-01T00:00:00", "%Y-%m-%dT%H:%M:%S")
+    competition_dto_mock.end_time = datetime.strptime("2021-01-02T00:00:00", "%Y-%m-%dT%H:%M:%S")
+    competition_dto_mock.is_private = False
+    competition_dto_mock.image = None
+    competition_dto_mock.organiser_id = uuid.uuid4()
+    competition_dto_mock.problems = [uuid.uuid4(), uuid.uuid4()]
+    competition_dto_mock.first_place_trophy = None
+    competition_dto_mock.second_place_trophy = None
+    competition_dto_mock.third_place_trophy = None
+    competition_dto_mock.parent_id = uuid.uuid4()
+
+    with pytest.raises(HTTPException):
+        create_competition(competition_dto_mock, competition_dto_mock.organiser_id)
+
+    
+
+
+
+
