@@ -208,7 +208,7 @@ class ProblemResultDTO(BaseModel):
     is_correct: bool
     num_of_points: float
     max_num_of_points: float
-    source_code: str
+    source_code: Union[str, None] = None
     language: Language
 
 

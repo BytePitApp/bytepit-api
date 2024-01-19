@@ -65,7 +65,7 @@ async def delete_competition(
 async def get_competition_results(
     competition_id: uuid.UUID, current_user: Annotated[User, Depends(get_current_verified_user)]
 ):
-    return competition_service.get_competition_results(competition_id)
+    return competition_service.get_competition_results(competition_id, current_user.id)
 
 
 @router.get("/virtual/{competition_id}/results", response_model=List[CompetitionResultDTO])
