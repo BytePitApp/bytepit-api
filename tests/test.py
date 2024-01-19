@@ -13,7 +13,6 @@ from fastapi import HTTPException
 
 from bytepit_api.models.dtos import LoginDTO, RegisterDTO
 
-#@patch("bytepit_api.services.auth_service.auth_queries", return_value=None)
 @pytest.mark.asyncio
 async def test_register_bad():
     from bytepit_api import database
@@ -79,8 +78,7 @@ def test_create_problem():
     from io import BytesIO
 
     database.problem_queries = AsyncMock()
-    database.problem_queries.insert_problem = AsyncMock(return_value=uuid.uuid4())  # Mock insert_problem instead of create_problem
-
+    database.problem_queries.insert_problem = AsyncMock(return_value=uuid.uuid4())  
     problem_dto_mock = MagicMock(spec=CreateProblemDTO)
     problem_dto_mock.name = "Test Problem"
     problem_dto_mock.example_input = "Example Input"
@@ -145,7 +143,3 @@ def test_create_problem_bad():
 
     with pytest.raises(HTTPException):
         result = create_problem(problem_dto_mock, current_user_id)
-
-
-    
- 
