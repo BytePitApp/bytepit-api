@@ -24,7 +24,7 @@ def get_all_problems():
     if result["result"]:
         return [Problem(**problem) for problem in result["result"]]
     else:
-        return None
+        return []
 
 
 def get_available_problems():
@@ -40,7 +40,7 @@ def get_available_problems():
     if result["result"]:
         return [Problem(**problem) for problem in result["result"]]
     else:
-        return None
+        return []
 
 
 def get_problem(problem_id: uuid.UUID):
