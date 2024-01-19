@@ -1,9 +1,10 @@
 import sys
 import os
+from unittest.mock import MagicMock, AsyncMock, patch
+
 import pytest
 import pydantic
 
-from unittest.mock import MagicMock, AsyncMock, patch
 
 os.environ[
     "SECRET_KEY"
