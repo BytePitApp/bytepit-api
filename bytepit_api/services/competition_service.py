@@ -4,7 +4,7 @@ import uuid
 from fastapi import status, HTTPException, Response
 
 
-from bytepit_api.database import competition_queries, problem_queries
+from bytepit_api.database import competition_queries, problem_queries, auth_queries
 import bytepit_api.helpers.competition_helpers as competition_helpers
 from bytepit_api.services import auth_service
 
@@ -22,11 +22,13 @@ def get_all_competitions(user_id: uuid.UUID):
     competitions = competition_queries.get_competitions(user_id)
     competitions_dtos = []
     for competition in competitions:
+        organiser = auth_queries.get_user_by_id(competition.organiser_id)
         problems = problem_queries.get_problems_by_competition(competition.id)
         trophies = competition_queries.get_trophies_by_competition(competition.id)
 
         competition_dict = competition.model_dump(exclude={"problems"})
         competition_dto = CompetitionDTO(**competition_dict)
+        competition_dto.organiser_username = organiser.username
         competition_dto.problems = [ProblemDTO(**problem.model_dump()) for problem in problems]
         competition_dto.trophies = [TrophyDTO(**trophy.model_dump()) for trophy in trophies]
         competitions_dtos.append(competition_dto)
@@ -38,11 +40,13 @@ def get_all_virtual_competitions():
     competitions = competition_queries.get_virtual_competitions()
     competitions_dtos = []
     for competition in competitions:
+        organiser = auth_queries.get_user_by_id(competition.organiser_id)
         problems = problem_queries.get_problems_by_competition(competition.id)
         trophies = competition_queries.get_trophies_by_competition(competition.parent_id)
 
         competition_dict = competition.model_dump(exclude={"problems"})
         competition_dto = CompetitionDTO(**competition_dict)
+        competition_dto.organiser_username = organiser.username
         competition_dto.problems = [ProblemDTO(**problem.model_dump()) for problem in problems]
         competition_dto.trophies = [TrophyDTO(**trophy.model_dump()) for trophy in trophies]
         competitions_dtos.append(competition_dto)
@@ -54,11 +58,13 @@ def get_active_competitions():
     competitions = competition_queries.get_active_competitions()
     competitions_dtos = []
     for competition in competitions:
+        organiser = auth_queries.get_user_by_id(competition.organiser_id)
         problems = problem_queries.get_problems_by_competition(competition.id)
         trophies = competition_queries.get_trophies_by_competition(competition.id)
 
         competition_dict = competition.model_dump(exclude={"problems"})
         competition_dto = CompetitionDTO(**competition_dict)
+        competition_dto.organiser_username = organiser.username
         competition_dto.problems = [ProblemDTO(**problem.model_dump()) for problem in problems]
         competition_dto.trophies = [TrophyDTO(**trophy.model_dump()) for trophy in trophies]
         competitions_dtos.append(competition_dto)
@@ -73,11 +79,13 @@ def get_random_competition():
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No competitions found",
         )
+    organiser = auth_queries.get_user_by_id(competition.organiser_id)
     problems = problem_queries.get_problems_by_competition(competition.id)
     trophies = competition_queries.get_trophies_by_competition(competition.id)
 
     competition_dict = competition.model_dump(exclude={"problems"})
     competition_dto = CompetitionDTO(**competition_dict)
+    competition_dto.organiser_username = organiser.username
     competition_dto.problems = [ProblemDTO(**problem.model_dump()) for problem in problems]
     competition_dto.trophies = [TrophyDTO(**trophy.model_dump()) for trophy in trophies]
     return competition_dto
@@ -90,11 +98,13 @@ def get_competition(competition_id: uuid.UUID):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"No competition with id {competition_id} found",
         )
+    oraganiser = auth_queries.get_user_by_id(competition.organiser_id)
     problems = problem_queries.get_problems_by_competition(competition.id)
     trophies = competition_queries.get_trophies_by_competition(competition.id)
 
     competition_dict = competition.model_dump(exclude={"problems"})
     competition_dto = CompetitionDTO(**competition_dict)
+    competition_dto.organiser_username = oraganiser.username
     competition_dto.problems = [ProblemDTO(**problem.model_dump()) for problem in problems]
     competition_dto.trophies = [TrophyDTO(**trophy.model_dump()) for trophy in trophies]
     return competition_dto
@@ -107,11 +117,13 @@ def get_virtual_competition(competition_id: uuid.UUID):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"No virtual competition with id {competition_id} found",
         )
+    user = auth_service.get_user(competition.organiser_id)
     problems = problem_queries.get_problems_by_competition(competition.id)
     trophies = competition_queries.get_trophies_by_competition(competition.parent_id)
 
     competition_dict = competition.model_dump(exclude={"problems"})
     competition_dto = CompetitionDTO(**competition_dict)
+    competition_dto.organiser_username = user.username
     competition_dto.problems = [ProblemDTO(**problem.model_dump()) for problem in problems]
     competition_dto.trophies = [TrophyDTO(**trophy.model_dump()) for trophy in trophies]
     return competition_dto
