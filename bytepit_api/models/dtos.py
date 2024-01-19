@@ -156,6 +156,7 @@ class CompetitionDTO(BaseModel):
     end_time: datetime
     parent_id: Union[uuid.UUID, None] = None
     organiser_id: Union[uuid.UUID, None] = None
+    organiser_username: Union[str, None] = None
     problems: Union[List[ProblemDTO], None] = []
     trophies: Union[List[TrophyDTO], None] = []
 
