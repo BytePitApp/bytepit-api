@@ -282,6 +282,7 @@ def get_trophies_by_user(user_id: uuid.UUID):
             total_points
         )
         SELECT
+        competitions.name AS competition_name,
         top_3_in_each_competition.competition_id,
         top_3_in_each_competition.rn AS rank_in_competition,
         trophies.icon
