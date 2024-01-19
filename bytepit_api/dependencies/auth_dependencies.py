@@ -1,18 +1,19 @@
 import os
 
 from urllib.parse import unquote
-
 from typing import Annotated, Dict, Optional
 
-from fastapi import Depends, HTTPException, status, Request
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 from fastapi.security import OAuth2
 from fastapi.security.utils import get_authorization_scheme_param
 
 from jose import JWTError, jwt
 
-from bytepit_api.helpers.login_helpers import get_user_by_email_or_username
-from bytepit_api.models.auth_schemes import TokenData, User
+
+from bytepit_api.helpers import auth_helpers
+from bytepit_api.models.db_models import User
+from bytepit_api.models.shared import TokenData
 
 
 class OAuth2PasswordBearerWithCookie(OAuth2):
@@ -24,13 +25,14 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
         auto_error: bool = True,
     ):
         if not scopes:
-            scopes = {} 
+            scopes = {}
         flows = OAuthFlowsModel(password={"tokenUrl": tokenUrl, "scopes": scopes})
         super().__init__(flows=flows, scheme_name=scheme_name, auto_error=auto_error)
 
     async def __call__(self, request: Request) -> Optional[str]:
         authorization: str = request.cookies.get("access_token")
-        authorization = unquote(authorization)
+        if authorization is not None:
+            authorization = unquote(authorization)
 
         scheme, param = get_authorization_scheme_param(authorization)
         if not authorization or scheme.lower() != "bearer":
@@ -65,7 +67,7 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         token_data = TokenData(email=email)
     except JWTError:
         raise credentials_exception
-    user = get_user_by_email_or_username(identifier=token_data.email)
+    user = auth_helpers.get_user_by_email_or_username(identifier=token_data.email)
     if user is None:
         raise credentials_exception
     return user
@@ -73,11 +75,23 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 
 def get_current_verified_user(current_user: Annotated[User, Depends(get_current_user)]):
     if not current_user.is_verified:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
     return current_user
 
 
 def get_current_admin_user(current_user: Annotated[User, Depends(get_current_verified_user)]):
     if not current_user.role == "admin":
-        raise HTTPException(status_code=400, detail="User is not admin")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User is not admin")
+    return current_user
+
+
+def get_current_organiser_user(current_user: Annotated[User, Depends(get_current_verified_user)]):
+    if not current_user.role == "organiser" and not current_user.role == "admin":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User is not organiser")
+    return current_user
+
+
+def get_current_approved_organiser(current_user: Annotated[User, Depends(get_current_organiser_user)]):
+    if not current_user.approved_by_admin:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User is not approved by admin")
     return current_user

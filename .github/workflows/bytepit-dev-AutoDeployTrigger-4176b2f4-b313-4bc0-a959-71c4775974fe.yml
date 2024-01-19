@@ -1,0 +1,41 @@
+name: Trigger auto deployment for bytepit-dev
+
+on:
+    pull_request:
+        types: [closed]
+        branches:
+            - development
+    # Allow manual trigger
+    workflow_dispatch:
+
+jobs:
+    build-and-deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout to the branch
+              uses: actions/checkout@v2
+
+            - name: Azure Login
+              uses: azure/login@v1
+              with:
+                  creds: ${{ secrets.BYTEPITDEV_AZURE_CREDENTIALS }}
+
+            - name: Build and push container image to registry
+              uses: azure/container-apps-deploy-action@v2
+              with:
+                  appSourcePath: ${{ github.workspace }}
+                  registryUrl: bytepit.azurecr.io
+                  registryUsername: ${{ secrets.BYTEPITDEV_REGISTRY_USERNAME }}
+                  registryPassword: ${{ secrets.BYTEPITDEV_REGISTRY_PASSWORD }}
+                  containerAppName: bytepit-dev
+                  resourceGroup: BytePit
+                  imageToBuild: bytepit.azurecr.io/bytepit-dev:${{ github.sha }}
+              env:
+                  DB_CONNECTION_STRING: "host=bytepit-pgsql01.postgres.database.azure.com dbname=bytepit-dev user=postgres password=Pgsql123"
+                  SECRET_KEY: "5ce3b19d23543100e7be58f39c430a8dfb1b4584fec88283583515b05481cdf4"
+                  RAPID_API_KEY: "672635c1ccmsh0127f8b5a277f05p1b59ffjsnb02aef9f2c98"
+                  BLOB_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;AccountName=bytepitstorageaccount;AccountKey=STW6NC26wOXcmVpFgDYeKaC2d9O6NWaYeiTP5lG1HRFNpcZILym8FQtXL6tWgp43N4VwEzNytW0i+AStdcuiuA==;EndpointSuffix=core.windows.net"
+                  BLOB_STORAGE_CONTAINER_NAME: "tests-dir"
+                  COMMUNICATION_SERVICES_CONNECTION_STRING: "endpoint=https://bypit-email.europe.communication.azure.com/;accesskey=B+X+DVh9MAZ0a5AXtMWlGjTobTGRc1FAY/9tiySC9x+ZjRBGK8O1NEULwLkVGU25IPT84RFRRO1lYIR2bkDo3A=="
+                  UI_URL: "https://dev.bytepit.cloud"

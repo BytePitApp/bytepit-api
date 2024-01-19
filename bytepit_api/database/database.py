@@ -23,16 +23,18 @@ class Database:
         sys.exit(1)
 
     def execute_one(self, query_tuple: tuple):
+        self._check_connection()
+        if self.connection.closed:
+            self.connection = self.connect(self.connection.dsn)
         try:
             assert isinstance(query_tuple[0], str), "Query must be a string"
-            assert query_tuple[1] is None or isinstance(
-                query_tuple[1], tuple
-            ), "Query parameters must be a tuple or None"
+            assert (
+                query_tuple[1] is None or isinstance(query_tuple[1], tuple) or isinstance(query_tuple[1], dict)
+            ), "Query parameters must be a dict, a tuple or None"
 
-            (query, param_tuple) = query_tuple
-
+            query, params = query_tuple
             cursor = self.connection.cursor()
-            cursor.execute(query, param_tuple)
+            cursor.execute(query, params)
 
             if cursor.description is not None:
                 result = cursor.fetchall()
@@ -44,19 +46,24 @@ class Database:
             return {"affected_rows": 0}
 
     def execute_many(self, query_tuple_list: List[tuple]):
+        self._check_connection()
         try:
             total_affected_rows = 0
             cursor = self.connection.cursor()
             with self.connection.transaction():
-                for query, param_tuple in query_tuple_list:
+                for query, params in query_tuple_list:
                     assert isinstance(query, str), "Query must be a string"
-                    assert param_tuple is None or isinstance(
-                        param_tuple, tuple
-                    ), "Query parameters must be a tuple or None"
+                    assert (
+                        params is None or isinstance(params, tuple) or isinstance(params, dict)
+                    ), "Query parameters must be a dict, a tuple or None"
 
-                    cursor.execute(query, param_tuple)
+                    cursor.execute(query, params)
                     total_affected_rows += cursor.rowcount
                 return {"affected_rows": total_affected_rows}
         except psycopg.Error as e:
             print(e)
             return {"affected_rows": 0}
+
+    def _check_connection(self):
+        if self.connection.closed:
+            self.connection = self.connect(self.connection.dsn)
