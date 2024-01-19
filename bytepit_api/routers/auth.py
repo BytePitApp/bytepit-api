@@ -37,6 +37,6 @@ def get_current_user(current_user: Annotated[User, Depends(get_current_verified_
     return current_user
 
 
-@router.get("/{id}", response_model=UserDTO)
-def get_user(id: uuid.UUID, current_user: Annotated[User, Depends(get_current_verified_user)]):
-    return auth_service.get_user(id)
+@router.get("/{username}", response_model=UserDTO)
+def get_user(username: str, current_user: Annotated[User, Depends(get_current_verified_user)]):
+    return auth_service.get_user(username)
