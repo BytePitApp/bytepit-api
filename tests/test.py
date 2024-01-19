@@ -1,9 +1,11 @@
-import sys
 import os
+import sys
 from unittest.mock import MagicMock, AsyncMock, patch
 
-import pytest
 import pydantic
+import pytest
+from bytepit_api.models.dtos import RegisterDTO
+from fastapi import HTTPException
 
 
 os.environ[
@@ -12,10 +14,6 @@ os.environ[
 sys.modules["bytepit_api.database"] = MagicMock()
 sys.modules["bytepit_api.helpers.email_helpers"] = MagicMock()
 sys.modules["bytepit_api.database.problem_queries"] = MagicMock()
-
-from fastapi import HTTPException
-
-from bytepit_api.models.dtos import LoginDTO, RegisterDTO
 
 
 @pytest.mark.asyncio
@@ -45,14 +43,13 @@ async def test_register_bad():
 async def test_register_good():
     from bytepit_api import database
     from bytepit_api.helpers import email_helpers
+    from bytepit_api.services.auth_service import register
 
     database.auth_queries = AsyncMock()
     database.auth_queries.get_user_by_email = MagicMock(return_value=False)
     database.auth_queries.get_user_by_username = MagicMock(return_value=False)
     database.auth_queries.create_user = AsyncMock(return_value=True)
     email_helpers.send_verification_email = AsyncMock()
-
-    from bytepit_api.services.auth_service import register
 
     form_data = RegisterDTO(
         username="testuser",
@@ -71,12 +68,13 @@ async def test_register_good():
 
 
 def test_create_problem():
+    import uuid
+    from io import BytesIO
+
     from fastapi import UploadFile, Response
     from bytepit_api import database
     from bytepit_api.models.dtos import CreateProblemDTO
     from bytepit_api.services.problem_service import create_problem
-    import uuid
-    from io import BytesIO
 
     database.problem_queries = AsyncMock()
     database.problem_queries.insert_problem = AsyncMock(return_value=uuid.uuid4())
@@ -110,12 +108,12 @@ def test_create_problem():
 
 
 def test_create_problem_bad():
-    from fastapi import UploadFile, Response
+    import uuid
+
+    from fastapi import UploadFile
     from bytepit_api import database
     from bytepit_api.models.dtos import CreateProblemDTO
     from bytepit_api.services.problem_service import create_problem
-    import uuid
-    from io import BytesIO
 
     database.problem_queries = AsyncMock()
     database.problem_queries.insert_problem = AsyncMock(return_value=uuid.uuid4())
@@ -141,17 +139,18 @@ def test_create_problem_bad():
     current_user_id = uuid.uuid4()
 
     with pytest.raises(HTTPException):
-        result = create_problem(problem_dto_mock, current_user_id)
+        create_problem(problem_dto_mock, current_user_id)
 
 
 def test_create_competition():
+    from datetime import datetime
+    import uuid
+    from unittest.mock import AsyncMock, MagicMock
+
     from fastapi import Response
     from bytepit_api import database
     from bytepit_api.models.dtos import CreateCompetitionDTO
     from bytepit_api.services.competition_service import create_competition
-    import uuid
-    from unittest.mock import AsyncMock, MagicMock
-    from datetime import datetime
 
     database.competition_queries = MagicMock()
     database.competition_queries.insert_competition = AsyncMock(
@@ -185,12 +184,13 @@ def test_create_competition():
 
 
 def test_create_competition_bad():
+    from datetime import datetime
+    import uuid
+    from unittest.mock import AsyncMock, MagicMock
+
     from bytepit_api import database
     from bytepit_api.models.dtos import CreateCompetitionDTO
     from bytepit_api.services.competition_service import create_competition
-    import uuid
-    from unittest.mock import AsyncMock, MagicMock
-    from datetime import datetime
 
     database.competition_queries = MagicMock()
     database.competition_queries.insert_competition = AsyncMock(
