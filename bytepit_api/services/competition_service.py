@@ -190,7 +190,7 @@ def delete_competition(competition_id: uuid.UUID):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-def get_competition_results(competition_id: uuid.UUID):
+def get_competition_results(competition_id: uuid.UUID, current_user_id: uuid.UUID):
     competition = competition_queries.get_competition(competition_id)
     if not competition:
         raise HTTPException(
@@ -202,6 +202,21 @@ def get_competition_results(competition_id: uuid.UUID):
         user_id = result["user_id"]
         user = auth_queries.get_user_by_id(user_id)
         result["username"] = user.username
+
+    user_result = next((result for result in results if result["user_id"] == current_user_id), None)
+    correct_problems_by_user = []
+    print(user_result)
+    if user_result:
+        for problem in user_result["problem_results"]:
+            if problem["is_correct"]:
+                correct_problems_by_user.append(problem["problem_id"])
+
+    for result in results:
+        if result["user_id"] != current_user_id:
+            for problem in result["problem_results"]:
+                if problem["problem_id"] not in correct_problems_by_user:
+                    problem["source_code"] = None
+
     return results
 
 
@@ -227,6 +242,11 @@ def get_virtual_competition_results(competition_id: uuid.UUID, current_user_id: 
     results.append(user_virtual_result)
 
     results = sorted(results, key=lambda x: x["total_points"], reverse=True)
+
+    if len(results) == 1:
+        results[0]["rank_in_competition"] = 1
+        results[0]["username"] = auth_queries.get_user_by_id(results[0]["user_id"]).username
+        return results
 
     for i in range(len(results)):
         if results[i - 1]["total_points"] == results[i]["total_points"]:
